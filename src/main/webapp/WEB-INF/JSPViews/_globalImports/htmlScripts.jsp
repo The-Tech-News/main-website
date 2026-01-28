@@ -1,0 +1,1 @@
+        <script src="<% out.print(request.getContextPath());%>/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
