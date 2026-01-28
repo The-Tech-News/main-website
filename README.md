@@ -4,7 +4,7 @@ This repo contains the main web page of the project for PRJ301
 
 ## Build
 
-### Running on-prem
+### Running in development
 
 Try to open the repo with Netbeans
 
