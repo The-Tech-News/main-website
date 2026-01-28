@@ -37,3 +37,4 @@ jobs:
                   file: ./dockerfile
                   push: true
                   tags: anhvlt/the-tech-news:latest
+              if: github.ref == 'refs/heads/master'
