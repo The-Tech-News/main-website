@@ -1,4 +1,4 @@
-name: The Tech News
+name: tech-news-instance
 
 services:
     web-page:
