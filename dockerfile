@@ -6,7 +6,7 @@ COPY src ./src
 RUN mvn -B package --file pom.xml
 
 # Stage 2: Deploy with Tomcat
-FROM dhi.io/tomcat:10-jdk21
+FROM tomcat:10.1-jdk21-temurin
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=maven-build /app/target/main-proj-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 EXPOSE 8080
