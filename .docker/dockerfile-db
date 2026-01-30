@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/mssql/server:2022-latest
+
+USER root
+
+# Switch to config directory
+WORKDIR /usr/config
+
+# Bundle config source
+COPY ./.docker/mssql-scripts/configure-db.sh  /usr/config/configure-db.sh
+COPY ./.docker/mssql-scripts/entrypoint.sh /usr/config/entrypoint.sh
+COPY ./.sql/setup.sql /usr/config/setup.sql
+
+# Grant permissions for to our scripts to be executable
+RUN ["/usr/bin/bash", "-c", "/usr/bin/chmod +x /usr/config/entrypoint.sh"]
+RUN ["/usr/bin/bash", "-c", "/usr/bin/chmod +x /usr/config/configure-db.sh"]
+
+USER mssql
+EXPOSE 1433
+
+ENTRYPOINT ["./entrypoint.sh"]

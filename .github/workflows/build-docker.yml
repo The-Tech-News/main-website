@@ -1,44 +1,59 @@
 name: Build Web App to Docker Container
 permissions:
-    contents: read
-
-on:
-    push:
-        branches: ["master"]
-    pull_request:
-        branches: [master]
-    workflow_dispatch:
-    schedule:
-        - cron: "0 0 * * 1"
-
+  contents: read
+'on':
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch: null
+  schedule:
+    - cron: 0 0 * * 1
 jobs:
-    build-tomcat:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check out repo
-              uses: actions/checkout@v4
+  build-tomcat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3.11.1
+      - name: Build Web & Validating before pushing to Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./.docker/dockerfile-web
+          push: false
 
-            - name: Set up Docker buildx
-              uses: docker/setup-buildx-action@v3.11.1
+      - name: Build MS SQL & Validating before pushing to Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./.docker/dockerfile-db
+          push: false
 
-            - name: Build & Validating before pushing to Docker
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  file: ./dockerfile
-                  push: false
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3.6.0
+        with:
+          username: '${{ secrets.DOCKERHUB_USERNAME }}'
+          password: '${{ secrets.DOCKERHUB_TOKEN }}'
+        if: github.ref == 'refs/heads/master'
+        
+      - name: Build Web & Push to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./.docker/dockerfile-web
+          push: true
+          tags: 'anhvlt/the-tech-news:web-latest'
+        if: github.ref == 'refs/heads/master'
 
-            - name: Log in to DockerHub
-              uses: docker/login-action@v3.6.0
-              with:
-                  username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-            - name: Build & Push to Docker Hub
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  file: ./dockerfile
-                  push: true
-                  tags: anhvlt/the-tech-news:latest
-              if: github.ref == 'refs/heads/master'
+      - name: Build MS SQL & Push to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./.docker/dockerfile-db
+          push: true
+          tags: 'anhvlt/the-tech-news:db-latest'
+        if: github.ref == 'refs/heads/master'
