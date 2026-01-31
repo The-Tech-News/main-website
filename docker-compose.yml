@@ -3,9 +3,7 @@ name: tech-news-instance
 services:
     db-instance:
         ports:
-            - "127.0.0.1:1433:1433"
-        expose:
-            - "1433"
+          - 1433:1433
         environment:
             - MSSQL_PID=Express
             - MSSQL_SA_PASSWORD=abcD_123
@@ -20,13 +18,9 @@ services:
 
     web-instance:
         ports:
-            - 8080:8080
+          - 8080:8080
         depends_on:
             db-instance:
                 condition: service_healthy
         restart: on-failure
         image: anhvlt/the-tech-news:web-latest
-
-networks:
-    technews-network:
-        driver: bridge
