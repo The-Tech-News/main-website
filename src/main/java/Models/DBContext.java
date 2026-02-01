@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 
 public class DBContext {
     private Connection conn;
-    private final String DB_URL = "jdbc:sqlserver://127.0.0.1:1433;databaseName=chinook;encrypt=false";
+    private final String DB_URL = "jdbc:sqlserver://127.0.0.1:1433;databaseName=technewsdb;encrypt=false;";
     private final String DB_USER = "sa";
-    private final String DB_PWD = "123";
-
+    private final String DB_PWD = "abcD_123";
+    
     public DBContext() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -20,7 +20,7 @@ public class DBContext {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     public Connection getConnection() {
         return conn;
     }
