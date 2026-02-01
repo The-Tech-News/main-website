@@ -17,7 +17,7 @@ CREATE TABLE [User] (
     [email] NVARCHAR(255) UNIQUE NOT NULL,
     [pwdHash] VARCHAR(MAX) NOT NULL,
     [name] NVARCHAR(255) NOT NULL,
-    [isEnabled] BOOLEAN NOT NULL,
+    [isEnabled] BIT NOT NULL,
     [groupId] INT NOT NULL
 )
 GO
@@ -72,7 +72,7 @@ AS BEGIN
     IF NOT EXISTS (
         SELECT 1
             FROM [Role]
-            WHERE groupName = @groupId
+            WHERE [id] = @groupId
     ) BEGIN
         RAISERROR ('Group Id did not found.', 16, 1);
 		RETURN;
@@ -83,9 +83,14 @@ AS BEGIN
 END
 GO
 
-INSERT INTO [Role] ([id], [groupName])
+SET IDENTITY_INSERT [dbo].[Role] ON;
+GO
+INSERT INTO [dbo].[Role] ([id], [groupName])
     VALUES  (1, 'Admin'),
             (2, 'Editor');
+GO
+SET IDENTITY_INSERT [dbo].[Role] OFF;
+GO
 
 EXEC NewUser N'administrator@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'Administrator', 1;
 GO
