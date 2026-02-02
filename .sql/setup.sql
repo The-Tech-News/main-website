@@ -1,6 +1,13 @@
 USE [master];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.databases WHERE name = N'technewsdb')
+BEGIN
+    RAISERROR ('technewdb is already existed', 20, -1) WITH LOG;
+    RETURN;
+END
+GO
+
 CREATE DATABASE [technewsdb];
 GO
 
@@ -63,7 +70,7 @@ AS BEGIN
 		RETURN;
     END
 
-    IF PATINDEX('^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$', @email) <> 0
+    IF PATINDEX('^[A-Za-z0-9\.]{1,64}@[A-Za-z0-9]{1,64}\.[A-Za-z]{1,3}$', @email) <> 0
         BEGIN
             RAISERROR ('Email is not in correct format.', 16, 1);
             RETURN;

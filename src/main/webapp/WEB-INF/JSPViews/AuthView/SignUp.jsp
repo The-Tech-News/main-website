@@ -13,17 +13,17 @@
                     <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Đăng Ký tài khoản mới</h1>
                 </div>
                 <div class="col-md-10 mx-auto col-lg-5">
-                    <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+                    <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="/auth?action=signup" method="POST">
                         <div class="form-floating mb-3"> 
-                            <input type="text" class="form-control" id="floatingInput" placeholder="Nguyễn Văn A"> 
+                            <input name="name" type="text" class="form-control" id="floatingInput"> 
                             <label for="floatingInput">Họ và Tên</label> 
                         </div>
                         <div class="form-floating mb-3"> 
-                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com"> 
+                            <input name="email" type="email" class="form-control" id="floatingInput"> 
                             <label for="floatingInput">Email</label> 
                         </div>
                         <div class="form-floating mb-3"> 
-                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password"> 
+                            <input name="pwdHash" type="password" class="form-control" id="floatingPassword"> 
                             <label for="floatingPassword">Mật khẩu</label> 
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng Ký</button> 

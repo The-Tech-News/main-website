@@ -6,8 +6,15 @@
                  <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>
               </ul>
               <ul class="nav">
-                 <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Login</a></li>
-                 <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Sign up</a></li>
+                 <li class="nav-item" id="signed-in-tab">
+                     <a href="/auth?action=logout" class="nav-link link-body-emphasis px-2">Sign out</a>
+                 </li>
+                 <li class="nav-item" id="not-signed-in-tab">
+                     <a href="/auth?action=signin" class="nav-link link-body-emphasis px-2">Login</a>
+                 </li>
+                 <li class="nav-item" id="not-signed-in-tab-2">
+                     <a href="/auth?action=signup" class="nav-link link-body-emphasis px-2">Sign up</a>
+                 </li>
               </ul>
            </div>
         </nav>
