@@ -9,17 +9,18 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @WebServlet(name = "Auth", urlPatterns = {"/auth"})
 public class Auth extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final String[] cookieHeadName = {"email", "pwdHash", "name", "groupId", "isLogin"};
-    private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,3}$";
+    private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,10}$";
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
-    private final String nameRegex = "^[A-Za-z0-9\\.]+$";
+    private final String nameRegex = "^[A-Za-z0-9 \\.]+$";
     private final UserDAO userObjectMgmt;
-    
     public Auth() {
         this.userObjectMgmt = new UserDAO();
     }
@@ -60,10 +61,11 @@ public class Auth extends HttpServlet {
         
         User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
         if (user != null) {
+            String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
             response.setStatus(200);
             response.addCookie(new Cookie("email", user.getEmail()));
             response.addCookie(new Cookie("pwdHash", user.getPwdHash()));
-            response.addCookie(new Cookie("name", user.getName()));
+            response.addCookie(new Cookie("name", encodedName));
             response.addCookie(new Cookie("groupId", "%d".formatted(user.getGroupId())));
             response.addCookie(new Cookie("isLogin", "true"));
             response.sendRedirect(request.getContextPath() + "/");
@@ -92,7 +94,6 @@ public class Auth extends HttpServlet {
         if (sqlExec != 0) {
             response.sendError(500, "The user could not be created.");
         } else {
-            this.ResetCredentialCookie(response);
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
         }
     }
