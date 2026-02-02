@@ -2,12 +2,11 @@ name: tech-news-instance
 
 services:
     db-instance:
-        ports:
-          - 1433:1433
-        environment:
-            - MSSQL_PID=Express
-            - MSSQL_SA_PASSWORD=abcD_123
-            - ACCEPT_EULA=Y
+        container_name: mssqldb
+        networks:
+            - backend
+        env_file:
+            - ./prod.env
         healthcheck:
             test: /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P "$$MSSQL_SA_PASSWORD" -C -d technewsdb -Q "SELECT 1" -b -o /dev/null
             interval: 10s
@@ -17,10 +16,19 @@ services:
         image: anhvlt/the-tech-news:db-latest
 
     web-instance:
+        container_name: tomcatweb
+        networks:
+            - backend
+        env_file:
+            - ./prod.env
         ports:
-          - 8080:8080
+            - 127.0.0.1:8080:8080
         depends_on:
             db-instance:
                 condition: service_healthy
         restart: on-failure
         image: anhvlt/the-tech-news:web-latest
+
+networks:
+    backend:
+        driver: bridge
