@@ -15,12 +15,12 @@
                 <div class="col-md-10 mx-auto col-lg-5">
                     <form id="hashForm" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="/auth?action=signin" method="POST">
                         <div class="form-floating mb-3"> 
-                            <input name="email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com"> 
+                            <input name="email" type="email" class="form-control" id="email"> 
                             <label for="floatingInput">Email</label> 
                         </div>
                         <div class="form-floating mb-3"> 
-                            <input name="pwdHash" type="password" class="form-control" id="floatingPassword" placeholder="Password"> 
-                            <label for="floatingPassword">Mật khẩu</label> 
+                            <input name="pwdHash" type="password" class="form-control" id="password"> 
+                            <label for="floatingPassword">Mật khẩu</label>
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button> 
                     </form>

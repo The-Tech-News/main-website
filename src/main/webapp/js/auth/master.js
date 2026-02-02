@@ -2,20 +2,10 @@
 
 'use strict';
 
-document.getElementById('hashForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent form submission
+$('#hashForm').submit(function() {
+    const rawPass = document.getElementById('password').value;
+    const md5Str = CryptoJS.MD5(rawPass).toString();
 
-    const password = document.getElementById('password').value.trim();
-
-    // Input validation
-    if (!password) {
-        alert("Please enter a password.");
-        return;
-    }
-
-    // Generate MD5 hash
-    const hash = CryptoJS.MD5(password).toString();
-
-    // Display the hash
-    document.getElementById('hashOutput').textContent = hash;
+    document.getElementById('password').value = md5Str;
+    return true; // return false to cancel form action
 });
