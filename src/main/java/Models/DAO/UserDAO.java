@@ -47,9 +47,9 @@ public class UserDAO extends DBContext {
         String sqlCommand = """
                             DECLARE	@return_value int;
                             EXEC	@return_value = [technewsdb].[dbo].[NewUser]
-                            		@email = N?,
-                            		@pwdHash = N?,
-                            		@name = N?,
+                            		@email = ?,
+                            		@pwdHash = ?,
+                            		@name = ?,
                             		@groupId = 2;
                             SELECT	'retval' = @return_value;
                             """;
