@@ -4,7 +4,6 @@ import Models.DBContext;
 import Models.Objects.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,8 +53,6 @@ public class UserDAO extends DBContext {
                             		@groupId = 2;
                             SELECT	'retval' = @return_value;
                             """;
-        
-        System.out.println(sqlCommand);
         
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setString(1, email);
