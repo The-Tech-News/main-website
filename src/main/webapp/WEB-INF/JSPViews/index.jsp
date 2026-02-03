@@ -3,10 +3,10 @@
 <html lang="en" data-bs-theme="auto">
     <head>
         <title>The Tech News - Home Page</title>
-<%@include file="/WEB-INF/JSPViews/_globalImports/htmlHead.jsp" %>
+<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/_globalImports/pageHeader.jsp" %>
+<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="px-4 pt-5 my-5 text-center border-bottom">
             <h1 class="display-4 fw-bold text-body-emphasis">It's up and running</h1>
             <div class="col-lg-6 mx-auto">
@@ -18,6 +18,6 @@
                 </div>
             </div>
         </div>
-<%@include file="/WEB-INF/JSPViews/_globalImports/htmlScripts.jsp" %>
+<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>

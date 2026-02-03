@@ -1,0 +1,4 @@
+.docker/* eol=lf
+.sql/* eol=lf
+src/* eol=lf
+build_docker.sh eol=lf
