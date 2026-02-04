@@ -1,5 +1,5 @@
 .docker/* eol=lf
-.sql/* eol=lf
+database/* eol=lf
 src/* eol=lf
 build_docker.sh eol=lf
 firewalld_set_mssql.sh eol=lf
