@@ -17,7 +17,7 @@ disableProxy() {
 }
 
 CONFIRM_PROXY_MSSQL="n"
-echo -e -n "Do you want to disable MSSQL proxy on FirewallD?: "
+echo -e -n "Do you want to enable MSSQL proxy on FirewallD?: "
 read -n 1 CONFIRM_PROXY_MSSQL
 
 if [[ "${CONFIRM_PROXY_MSSQL}" =~ ^[Yy]$ ]]; then
