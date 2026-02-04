@@ -19,3 +19,8 @@ buildNumber.properties
 # Exclude Visual Studio personalized files
 .vscode
 .vs
+
+# Docker Volumes
+dockervols/dbdata
+dockervols/dblogs
+dockervols/weblogs

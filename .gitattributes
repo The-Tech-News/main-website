@@ -1,4 +1,7 @@
 .docker/* eol=lf
-.sql/* eol=lf
+database/* eol=lf
 src/* eol=lf
 build_docker.sh eol=lf
+firewalld_set_mssql.sh eol=lf
+docker-compose.yml eol=lf
+prod.env eol=lf
