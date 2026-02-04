@@ -21,4 +21,6 @@ buildNumber.properties
 .vs
 
 # Docker Volumes
-dockervols
+dockervols/dbdata
+dockervols/dblogs
+dockervols/weblogs
