@@ -3,10 +3,15 @@ name: tech-news-instance
 services:
     db-instance:
         container_name: mssqldb
+        volumes:
+            - dbdata:/var/opt/mssql/data/
+            - dblogs:/var/opt/mssql/logs/
         networks:
             - backend
         env_file:
             - ./prod.env
+        ports:
+            - 127.0.0.1:1433:1433
         healthcheck:
             test: /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P "$$MSSQL_SA_PASSWORD" -C -d technewsdb -Q "SELECT 1" -b -o /dev/null
             interval: 10s
@@ -17,6 +22,8 @@ services:
 
     web-instance:
         container_name: tomcatweb
+        volumes:
+            - weblogs:/usr/local/tomcat/logs
         networks:
             - backend
         env_file:
@@ -26,8 +33,28 @@ services:
         depends_on:
             db-instance:
                 condition: service_healthy
-        restart: on-failure
+        restart: always
         image: anhvlt/the-tech-news:web-latest
+
+volumes:
+    dbdata:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./dockervols/dbdata
+    dblogs:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./dockervols/dblogs
+    weblogs:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./dockervols/weblogs
 
 networks:
     backend:
