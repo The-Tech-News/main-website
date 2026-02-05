@@ -20,7 +20,7 @@ public class Auth extends HttpServlet {
     private final String[] cookieHeadName = {"email", "pwdHash", "name", "groupId", "isLogin"};
     private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,10}$";
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
-    private final String nameRegex = "^[A-Za-z0-9 \\.]+$";
+    private final String nameRegex = "^[\\p{L}\\. ]+$";
     
     private final UserDAO userObjectMgmt;
     
