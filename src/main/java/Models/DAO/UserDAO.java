@@ -16,7 +16,7 @@ public class UserDAO extends DBContext {
         String sqlCommand = """
                             SELECT TOP (1) [id], [email], [pwdHash], [name], [isEnabled], [groupId]
                                 FROM [technewsdb].[dbo].[User]
-                                WHERE [email] = ? AND [pwdHash] = ?;
+                                WHERE [email] = ? AND [pwdHash] = ? AND isEnabled = 1;
                             """;
         
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
