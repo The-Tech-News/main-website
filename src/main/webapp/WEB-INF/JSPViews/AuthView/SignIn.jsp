@@ -4,6 +4,7 @@
     <head>
         <title>The Tech News - Đăng Nhập</title>
 <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+
     </head>
     <body>
 <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
@@ -19,7 +20,7 @@
                             <label for="floatingInput">Email</label> 
                         </div>
                         <div class="form-floating mb-3"> 
-                            <input name="pwdHash" type="password" class="form-control" id="password"> 
+                            <input name="pwdHash" type="password" class="form-control" id="password" autocomplete="off"> 
                             <label for="floatingPassword">Mật khẩu</label>
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button> 
