@@ -1,9 +1,3 @@
-<%-- 
-    Document   : Denied
-    Created on : Feb 2, 2026, 7:09:48 PM
-    Author     : sh
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>

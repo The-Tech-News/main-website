@@ -157,7 +157,13 @@ public class Auth extends HttpServlet {
                 response.setStatus(500);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/Denied.jsp").forward(request, response);
             }
-            default -> {}
+            default -> {
+                if (this.IsSignedIn(request)) {
+                    response.sendRedirect(request.getContextPath() + "/");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/auth?action=signin");
+                }
+            }
         }
     }
     
@@ -166,7 +172,10 @@ public class Auth extends HttpServlet {
         switch (request.getParameter("action")) {
             case "signin" -> this.HandleSignIn(request, response);
             case "signup" -> this.HandleSignUp(request, response);
-            default -> {}
+            default -> {
+                response.setStatus(404);
+                request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/Denied.jsp").forward(request, response);
+            }
         }
     }
 
