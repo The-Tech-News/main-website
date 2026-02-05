@@ -1,6 +1,5 @@
-        <%@page import="Models.Objects.User"%>
-<%@page import="Controllers.Auth"%>
-<nav class="py-2 bg-body-tertiary border-bottom">
+<%@page import="Models.Objects.User"%>
+        <nav class="py-2 bg-body-tertiary border-bottom">
            <div class="container d-flex flex-wrap">
               <ul class="nav me-auto">
                  <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
@@ -10,7 +9,6 @@
                <ul class="nav">
                    <%
                        User u = (User) request.getSession().getAttribute("loggedUser");
-                       
                        if (u != null) {
                    %>
                    <li class="nav-item" id="signed-in-tab">
