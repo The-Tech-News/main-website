@@ -1,0 +1,14 @@
+stages:
+  - build
+
+build:
+  stage: build
+  tags:
+    - default
+  image: maven:3.9.12-eclipse-temurin-21-alpine
+  script:
+    - mvn -B package --file pom.xml
+  artifacts:
+      paths:
+        - target/main-proj-1.0-SNAPSHOT.war
+      expire_in: never
