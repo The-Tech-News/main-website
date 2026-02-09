@@ -21,7 +21,6 @@ public class PostListServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        // Check login
         if (session == null || session.getAttribute("user") == null) {
             response.sendError(404);
             return;
@@ -31,7 +30,7 @@ public class PostListServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action == null || action.equals("list")) {
-            List<Post> posts = postDAO.getAllPosts();
+            List<Post> posts = postDAO.getAll();
             request.setAttribute("posts", posts);
             request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
                     .forward(request, response);
@@ -48,7 +47,7 @@ public class PostListServlet extends HttpServlet {
             return;
         }
 
-        if (action.equals("edit") || action.equals("hide")) {
+        if (action.equals("edit")) {
             int id;
             try {
                 id = Integer.parseInt(request.getParameter("id"));
@@ -57,26 +56,15 @@ public class PostListServlet extends HttpServlet {
                 return;
             }
 
-            Post post = postDAO.getPostById(id);
-            if (post == null) {
-                response.sendError(404);
-                return;
-            }
-
-            // Permission check
-            if (!hasPermission(user, post)) {
+            Post post = postDAO.getById(id);
+            if (post == null || !hasPermission(user, post)) {
                 response.sendError(500);
                 return;
             }
 
-            if (action.equals("edit")) {
-                request.setAttribute("post", post);
-                request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
-                        .forward(request, response);
-            } else {
-                postDAO.hidePost(id);
-                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-            }
+            request.setAttribute("post", post);
+            request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
+                    .forward(request, response);
         }
     }
 
@@ -99,12 +87,17 @@ public class PostListServlet extends HttpServlet {
         }
 
         if (action.equals("create")) {
-            int userId = Integer.parseInt(request.getParameter("userId"));
             int categoryId = Integer.parseInt(request.getParameter("categoryId"));
             String title = request.getParameter("title");
             String content = request.getParameter("content");
 
-            postDAO.createPost(userId, categoryId, title, content);
+            Post p = new Post();
+            p.setUserId(user.getId()); // lấy từ session
+            p.setCategoryId(categoryId);
+            p.setTitle(title);
+            p.setContent(content);
+
+            postDAO.insert(p);
             response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
         }
 
@@ -113,13 +106,29 @@ public class PostListServlet extends HttpServlet {
             String title = request.getParameter("title");
             String content = request.getParameter("content");
 
-            Post post = postDAO.getPostById(id);
+            Post post = postDAO.getById(id);
             if (!hasPermission(user, post)) {
                 response.sendError(500);
                 return;
             }
 
-            postDAO.updatePost(id, title, content);
+            post.setTitle(title);
+            post.setContent(content);
+            postDAO.update(post);
+
+            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        }
+
+        if (action.equals("hide")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            Post post = postDAO.getById(id);
+
+            if (!hasPermission(user, post)) {
+                response.sendError(500);
+                return;
+            }
+
+            postDAO.hide(id);
             response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
         }
     }
