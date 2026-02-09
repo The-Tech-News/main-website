@@ -4,41 +4,79 @@ import dao.PostDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import model.Post;
+import model.User;
+
 import java.io.IOException;
 import java.util.List;
-import model.Post;
 
 @WebServlet("/admin/posts")
 public class PostListServlet extends HttpServlet {
 
-    private PostDAO dao = new PostDAO();
+    private PostDAO postDAO = new PostDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+
+        // Check login
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendError(404);
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
         String action = request.getParameter("action");
 
-        try {
-            if (action == null || action.equals("list")) {
-                List<Post> list = dao.getAll();
-                request.setAttribute("posts", list);
-                request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
-                        .forward(request, response);
+        if (action == null || action.equals("list")) {
+            List<Post> posts = postDAO.getAllPosts();
+            request.setAttribute("posts", posts);
+            request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
+                    .forward(request, response);
+            return;
+        }
 
-            } else if (action.equals("create")) {
-                request.getRequestDispatcher("/WEB-INF/PostListView/create.jsp")
-                        .forward(request, response);
+        if (action.equals("create")) {
+            if (!isAdminOrEditor(user)) {
+                response.sendError(500);
+                return;
+            }
+            request.getRequestDispatcher("/WEB-INF/PostListView/create.jsp")
+                    .forward(request, response);
+            return;
+        }
 
-            } else if (action.equals("edit")) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Post p = dao.getById(id);
-                request.setAttribute("post", p);
+        if (action.equals("edit") || action.equals("hide")) {
+            int id;
+            try {
+                id = Integer.parseInt(request.getParameter("id"));
+            } catch (Exception e) {
+                response.sendError(404);
+                return;
+            }
+
+            Post post = postDAO.getPostById(id);
+            if (post == null) {
+                response.sendError(404);
+                return;
+            }
+
+            // Permission check
+            if (!hasPermission(user, post)) {
+                response.sendError(500);
+                return;
+            }
+
+            if (action.equals("edit")) {
+                request.setAttribute("post", post);
                 request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
                         .forward(request, response);
+            } else {
+                postDAO.hidePost(id);
+                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
             }
-        } catch (Exception e) {
-            response.sendError(500);
         }
     }
 
@@ -46,35 +84,54 @@ public class PostListServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendError(404);
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
         String action = request.getParameter("action");
 
-        try {
-            if (action.equals("create")) {
-                Post p = new Post();
-                p.setUserId(Integer.parseInt(request.getParameter("userId")));
-                p.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
-                p.setTitle(request.getParameter("title"));
-                p.setContent(request.getParameter("content"));
-
-                dao.insert(p);
-                response.sendRedirect("posts?action=list");
-
-            } else if (action.equals("edit")) {
-                Post p = new Post();
-                p.setId(Integer.parseInt(request.getParameter("id")));
-                p.setTitle(request.getParameter("title"));
-                p.setContent(request.getParameter("content"));
-
-                dao.update(p);
-                response.sendRedirect("posts?action=list");
-
-            } else if (action.equals("hide")) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                dao.hide(id);
-                response.sendRedirect("posts?action=list");
-            }
-        } catch (Exception e) {
+        if (!isAdminOrEditor(user)) {
             response.sendError(500);
+            return;
         }
+
+        if (action.equals("create")) {
+            int userId = Integer.parseInt(request.getParameter("userId"));
+            int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+            String title = request.getParameter("title");
+            String content = request.getParameter("content");
+
+            postDAO.createPost(userId, categoryId, title, content);
+            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        }
+
+        if (action.equals("edit")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String title = request.getParameter("title");
+            String content = request.getParameter("content");
+
+            Post post = postDAO.getPostById(id);
+            if (!hasPermission(user, post)) {
+                response.sendError(500);
+                return;
+            }
+
+            postDAO.updatePost(id, title, content);
+            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        }
+    }
+
+    private boolean isAdminOrEditor(User user) {
+        return user.getGroupName().equalsIgnoreCase("Admin")
+                || user.getGroupName().equalsIgnoreCase("Editor");
+    }
+
+    private boolean hasPermission(User user, Post post) {
+        if (user.getGroupName().equalsIgnoreCase("Admin")) return true;
+        return user.getGroupName().equalsIgnoreCase("Editor")
+                && post.getUserId() == user.getId();
     }
 }
