@@ -1,7 +1,7 @@
 package Models.DAO;
 
 import Models.DBContext;
-import Models.Post;
+import Models.Objects.Post;
 
 import java.sql.*;
 import java.util.ArrayList;
