@@ -153,14 +153,15 @@ public class PostListServlet extends HttpServlet {
         }
     }
 
-    private boolean isAdminOrEditor(User user) {
-        return user.getGroupName().equalsIgnoreCase("Admin")
-                || user.getGroupName().equalsIgnoreCase("Editor");
-    }
+  private boolean isAdminOrEditor(User user) {
+    return user.getGroupId() == 1 || user.getGroupId() == 2;
+}
 
-    private boolean hasPermission(User user, Post post) {
-        if (user.getGroupName().equalsIgnoreCase("Admin")) return true;
-        return user.getGroupName().equalsIgnoreCase("Editor")
-                && post.getUserId() == user.getId();
-    }
+
+   private boolean hasPermission(User user, Post post) {
+    if (user.getGroupId() == 1) return true; // Admin
+    return user.getGroupId() == 2            // Editor
+            && post.getUserId() == user.getId();
+}
+
 }
