@@ -1,70 +1,70 @@
 package Controllers;
 
 import Models.DAO.PostDAO;
-import Models.Objects.Post;   
+import Models.Objects.Post;
 import Models.Objects.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
+
 @WebServlet("/admin/posts")
 public class PostListServlet extends HttpServlet {
 
-    private PostDAO postDAO = new PostDAO();
+    private final PostDAO postDAO = new PostDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
         if (session == null || session.getAttribute("user") == null) {
-            response.sendError(404);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
         User user = (User) session.getAttribute("user");
         String action = request.getParameter("action");
 
-        if (action == null || action.equals("list")) {
-            List<Post> posts = postDAO.getAll();
-            request.setAttribute("posts", posts);
-            request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
-                    .forward(request, response);
-            return;
-        }
-
-        if (action.equals("create")) {
-            if (!isAdminOrEditor(user)) {
-                response.sendError(500);
-                return;
-            }
-            request.getRequestDispatcher("/WEB-INF/PostListView/create.jsp")
-                    .forward(request, response);
-            return;
-        }
-
-        if (action.equals("edit")) {
-            int id;
-            try {
-                id = Integer.parseInt(request.getParameter("id"));
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        try {
+            if (action == null || action.equals("list")) {
+                List<Post> posts = postDAO.getAll();
+                request.setAttribute("posts", posts);
+                request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
+                        .forward(request, response);
                 return;
             }
 
-            Post post = postDAO.getById(id);
-            if (post == null || !hasPermission(user, post)) {
-                response.sendError(500);
+            if (action.equals("create")) {
+                if (!isAdminOrEditor(user)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                request.getRequestDispatcher("/WEB-INF/PostListView/create.jsp")
+                        .forward(request, response);
                 return;
             }
 
-            request.setAttribute("post", post);
-            request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
-                    .forward(request, response);
+            if (action.equals("edit")) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                Post post = postDAO.getById(id);
+
+                if (post == null || !hasPermission(user, post)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                request.setAttribute("post", post);
+                request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
+                        .forward(request, response);
+            }
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
     }
 
@@ -74,94 +74,72 @@ public class PostListServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendError(404);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
         User user = (User) session.getAttribute("user");
-        String action = request.getParameter("action");
-
         if (!isAdminOrEditor(user)) {
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
-        if (action.equals("create")) {
-            int categoryId;
-            try {
-                categoryId = Integer.parseInt(request.getParameter("categoryId"));
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+        String action = request.getParameter("action");
+
+        try {
+            if (action.equals("create")) {
+                int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+
+                Post p = new Post();
+                p.setUserId(user.getId());
+                p.setCategoryId(categoryId);
+                p.setTitle(request.getParameter("title"));
+                p.setContent(request.getParameter("content"));
+
+                postDAO.insert(p);
             }
 
-            String title = request.getParameter("title");
-            String content = request.getParameter("content");
+            if (action.equals("edit")) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                Post post = postDAO.getById(id);
 
-            Post p = new Post();
-            p.setUserId(user.getId());
-            p.setCategoryId(categoryId);
-            p.setTitle(title);
-            p.setContent(content);
+                if (!hasPermission(user, post)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
 
-            postDAO.insert(p);
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-        }
-
-        if (action.equals("edit")) {
-            int id;
-            try {
-                id = Integer.parseInt(request.getParameter("id"));
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                post.setTitle(request.getParameter("title"));
+                post.setContent(request.getParameter("content"));
+                postDAO.update(post);
             }
 
-            String title = request.getParameter("title");
-            String content = request.getParameter("content");
+            if (action.equals("hide")) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                Post post = postDAO.getById(id);
 
-            Post post = postDAO.getById(id);
-            if (!hasPermission(user, post)) {
-                response.sendError(500);
-                return;
+                if (!hasPermission(user, post)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                postDAO.hide(id);
             }
-
-            post.setTitle(title);
-            post.setContent(content);
-            postDAO.update(post);
 
             response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-        }
 
-        if (action.equals("hide")) {
-            int id;
-            try {
-                id = Integer.parseInt(request.getParameter("id"));
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            Post post = postDAO.getById(id);
-            if (!hasPermission(user, post)) {
-                response.sendError(500);
-                return;
-            }
-
-            postDAO.hide(id);
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
     }
 
-  private boolean isAdminOrEditor(User user) {
-    return user.getGroupId() == 1 || user.getGroupId() == 2;
-}
+    private boolean isAdminOrEditor(User user) {
+        return user.getGroupId() == 1 || user.getGroupId() == 2;
+    }
 
-
-   private boolean hasPermission(User user, Post post) {
-    if (user.getGroupId() == 1) return true; // Admin
-    return user.getGroupId() == 2            // Editor
-            && post.getUserId() == user.getId();
-}
-
+    private boolean hasPermission(User user, Post post) {
+        if (user.getGroupId() == 1) return true;
+        return user.getGroupId() == 2 && post.getUserId() == user.getId();
+    }
 }
