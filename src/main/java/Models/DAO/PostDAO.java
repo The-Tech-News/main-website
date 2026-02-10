@@ -12,19 +12,20 @@ public class PostDAO extends DBContext {
         List<Post> list = new ArrayList<>();
         String sql = "SELECT * FROM PostList WHERE hidden = 0";
 
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            Post p = new Post(
-                rs.getInt("id"),
-                rs.getInt("userId"),
-                rs.getInt("categoryId"),
-                rs.getString("title"),
-                rs.getString("content"),
-                rs.getBoolean("hidden")
-            );
-            list.add(p);
+            while (rs.next()) {
+                Post p = new Post(
+                    rs.getInt("id"),
+                    rs.getInt("userId"),
+                    rs.getInt("categoryId"),
+                    rs.getString("title"),
+                    rs.getString("content"),
+                    rs.getBoolean("hidden")
+                );
+                list.add(p);
+            }
         }
         return list;
     }
@@ -34,29 +35,34 @@ public class PostDAO extends DBContext {
             INSERT INTO PostList(userId, categoryId, title, content, hidden)
             VALUES (?, ?, ?, ?, 0)
         """;
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, p.getUserId());
-        ps.setInt(2, p.getCategoryId());
-        ps.setString(3, p.getTitle());
-        ps.setString(4, p.getContent());
-        ps.executeUpdate();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, p.getUserId());
+            ps.setInt(2, p.getCategoryId());
+            ps.setString(3, p.getTitle());
+            ps.setString(4, p.getContent());
+            ps.executeUpdate();
+        }
     }
 
     public Post getById(int id) throws SQLException {
         String sql = "SELECT * FROM PostList WHERE id = ?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            return new Post(
-                rs.getInt("id"),
-                rs.getInt("userId"),
-                rs.getInt("categoryId"),
-                rs.getString("title"),
-                rs.getString("content"),
-                rs.getBoolean("hidden")
-            );
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Post(
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getInt("categoryId"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getBoolean("hidden")
+                    );
+                }
+            }
         }
         return null;
     }
@@ -67,17 +73,21 @@ public class PostDAO extends DBContext {
             SET title = ?, content = ?
             WHERE id = ?
         """;
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, p.getTitle());
-        ps.setString(2, p.getContent());
-        ps.setInt(3, p.getId());
-        ps.executeUpdate();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, p.getTitle());
+            ps.setString(2, p.getContent());
+            ps.setInt(3, p.getId());
+            ps.executeUpdate();
+        }
     }
 
     public void hide(int id) throws SQLException {
         String sql = "UPDATE PostList SET hidden = 1 WHERE id = ?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, id);
-        ps.executeUpdate();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 }
