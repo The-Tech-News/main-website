@@ -1,15 +1,15 @@
 package Controllers;
 
-import dao.PostDAO;
+import Models.DAO.PostDAO;
+import Models.Post;
+import Models.User;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import model.Post;
-import model.User;
 
 import java.io.IOException;
 import java.util.List;
-
 @WebServlet("/admin/posts")
 public class PostListServlet extends HttpServlet {
 
