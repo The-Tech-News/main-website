@@ -1,10 +1,11 @@
 package Models.DAO;
 
-import db.DBContext;
+import Models.DBContext;
+import Models.Post;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Post;
 
 public class PostDAO extends DBContext {
 
@@ -12,17 +13,17 @@ public class PostDAO extends DBContext {
         List<Post> list = new ArrayList<>();
         String sql = "SELECT * FROM PostList WHERE hidden = 0";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = getConnection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Post p = new Post(
-                    rs.getInt("id"),
-                    rs.getInt("userId"),
-                    rs.getInt("categoryId"),
-                    rs.getString("title"),
-                    rs.getString("content"),
-                    rs.getBoolean("hidden")
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getInt("categoryId"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getBoolean("hidden")
                 );
                 list.add(p);
             }
@@ -36,7 +37,7 @@ public class PostDAO extends DBContext {
             VALUES (?, ?, ?, ?, 0)
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, p.getUserId());
             ps.setInt(2, p.getCategoryId());
             ps.setString(3, p.getTitle());
@@ -48,18 +49,18 @@ public class PostDAO extends DBContext {
     public Post getById(int id) throws SQLException {
         String sql = "SELECT * FROM PostList WHERE id = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Post(
-                        rs.getInt("id"),
-                        rs.getInt("userId"),
-                        rs.getInt("categoryId"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getBoolean("hidden")
+                            rs.getInt("id"),
+                            rs.getInt("userId"),
+                            rs.getInt("categoryId"),
+                            rs.getString("title"),
+                            rs.getString("content"),
+                            rs.getBoolean("hidden")
                     );
                 }
             }
@@ -74,7 +75,7 @@ public class PostDAO extends DBContext {
             WHERE id = ?
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setString(1, p.getTitle());
             ps.setString(2, p.getContent());
             ps.setInt(3, p.getId());
@@ -85,7 +86,7 @@ public class PostDAO extends DBContext {
     public void hide(int id) throws SQLException {
         String sql = "UPDATE PostList SET hidden = 1 WHERE id = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
