@@ -51,8 +51,8 @@ public class PostListServlet extends HttpServlet {
             int id;
             try {
                 id = Integer.parseInt(request.getParameter("id"));
-            } catch (Exception e) {
-                response.sendError(404);
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
@@ -87,12 +87,19 @@ public class PostListServlet extends HttpServlet {
         }
 
         if (action.equals("create")) {
-            int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+            int categoryId;
+            try {
+                categoryId = Integer.parseInt(request.getParameter("categoryId"));
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
             String title = request.getParameter("title");
             String content = request.getParameter("content");
 
             Post p = new Post();
-            p.setUserId(user.getId()); // lấy từ session
+            p.setUserId(user.getId());
             p.setCategoryId(categoryId);
             p.setTitle(title);
             p.setContent(content);
@@ -102,7 +109,14 @@ public class PostListServlet extends HttpServlet {
         }
 
         if (action.equals("edit")) {
-            int id = Integer.parseInt(request.getParameter("id"));
+            int id;
+            try {
+                id = Integer.parseInt(request.getParameter("id"));
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
             String title = request.getParameter("title");
             String content = request.getParameter("content");
 
@@ -120,9 +134,15 @@ public class PostListServlet extends HttpServlet {
         }
 
         if (action.equals("hide")) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Post post = postDAO.getById(id);
+            int id;
+            try {
+                id = Integer.parseInt(request.getParameter("id"));
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
 
+            Post post = postDAO.getById(id);
             if (!hasPermission(user, post)) {
                 response.sendError(500);
                 return;
