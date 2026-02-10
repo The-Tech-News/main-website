@@ -1,8 +1,8 @@
 package Controllers;
 
 import Models.DAO.PostDAO;
-import Models.Post;
-import Models.User;
+import Models.Objects.Post;   
+import Models.Objects.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
