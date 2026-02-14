@@ -190,7 +190,7 @@ AS BEGIN
         WHERE [id] = @id
 END
 
-EXEC NewCategory 'windows', 'A category about Windows and Microslop';
+EXEC NewCategory 'windows', 'A category about Windows';
 GO
-EXEC NewCategory 'linux', 'A category about the dominance of Linux on both desktop and laptop (boooo microslop)'
+EXEC NewCategory 'linux', 'A category about Linux';
 GO
