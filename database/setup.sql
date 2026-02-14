@@ -108,7 +108,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [Category] (
-    [id] INT PRIMARY KEY,
+    [id] INT IDENTITY PRIMARY KEY,
     [name] NVARCHAR(50) UNIQUE NOT NULL,
     [description] NVARCHAR(250) NOT NULL,
 )
@@ -189,3 +189,8 @@ AS BEGIN
         SET [name] = @newName, [description] = @description
         WHERE [id] = @id
 END
+
+EXEC NewCategory 'windows', 'A category about Windows and Microslop';
+GO
+EXEC NewCategory 'linux', 'A category about the dominance of Linux on both desktop and laptop (boooo microslop)'
+GO
