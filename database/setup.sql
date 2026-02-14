@@ -101,3 +101,91 @@ GO
 
 EXEC NewUser N'administrator@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'Administrator', 1;
 GO
+
+/** TABLE: Category **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [Category] (
+    [id] INT PRIMARY KEY,
+    [name] NVARCHAR(50) UNIQUE NOT NULL,
+    [description] NVARCHAR(250) NOT NULL,
+)
+GO
+
+/** Procedure: NewCategory **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE NewCategory
+    @name NVARCHAR(50),
+    @description NVARCHAR(250)
+AS BEGIN
+    IF @name IS NULL OR DATALENGTH(@name) = 0 BEGIN
+        RAISERROR ('A category name must not be empty', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+            FROM [Category] AS c
+            WHERE c.name = @name
+    ) BEGIN
+        RAISERROR ('A category with name is already existed', 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO [Category] ([name], [description])
+        VALUES (@name, @description);
+END
+
+/** Procedure: EditCategory **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE EditCategory
+    @oldName NVARCHAR(50),
+    @newName NVARCHAR(50),
+    @description NVARCHAR(250)
+AS BEGIN
+    IF @oldName IS NULL OR DATALENGTH(@oldName) = 0 BEGIN
+        RAISERROR ('An old category name must not be empty', 16, 1);
+        RETURN;
+    END
+
+    IF @newName IS NULL OR DATALENGTH(@newName) = 0 BEGIN
+        RAISERROR ('A new category name must not be empty', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (
+        SELECT 1
+            FROM [Category] AS c
+            WHERE c.name = @oldName
+    ) BEGIN
+        RAISERROR ('A category with name does not exist. Try to create new one instead', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+            FROM [Category] AS c
+            WHERE c.name = @newName
+    ) BEGIN
+        RAISERROR ('A category with that new name does exist. Try another name instead', 16, 1);
+        RETURN;
+    END
+
+    DECLARE @id INT = (
+        SELECT TOP(1) [id]
+            FROM [Category] AS c
+            WHERE c.name = @oldName
+    )
+
+    UPDATE [Category]
+        SET [name] = @newName, [description] = @description
+        WHERE [id] = @id
+END
