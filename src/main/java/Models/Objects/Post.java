@@ -3,8 +3,8 @@ package Models.Objects;
 public class Post {
 
     private final int id;
-    private int userId;
-    private int categoryId;
+    private final int userId;
+    private final int categoryId;
     private String title;
     private String content;
     private boolean isHidden;
@@ -40,14 +40,6 @@ public class Post {
 
     public boolean isHidden() {
         return isHidden;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
     }
 
     public void setTitle(String title) {

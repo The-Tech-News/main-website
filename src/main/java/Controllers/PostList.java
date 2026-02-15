@@ -26,7 +26,7 @@ public class PostList extends HttpServlet {
     public PostList() {
         this.postObjectMgmt = new PostDAO();
     }
-    
+
     private boolean IsAuthenticated(HttpSession session) {
         return session == null || session.getAttribute("loggedUser") == null;
     }
@@ -41,17 +41,16 @@ public class PostList extends HttpServlet {
         }
         return user.getGroupId() == 2 && post.getUserId() == user.getId();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
 //        HttpSession session = request.getSession(false);
 //        
 //        if (!this.IsAuthenticated(session)) {
 //            response.sendError(500, "User is not authenticated");
 //            return;
 //        }
-        
+
         switch (request.getParameter("action")) {
             case null -> {
                 response.sendRedirect("/admin/posts?action=list");
@@ -62,31 +61,31 @@ public class PostList extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/List.jsp").forward(request, response);
             }
             case "create" -> {
-                if (!isAdminOrEditor(user)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
+//                if (!isAdminOrEditor(user)) {
+//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//                    return;
+//                }
+//                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
             }
             case "edit" -> {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Post post = null;
-                try {
-                    post = postObjectMgmt.getById(id);
-                } catch (SQLException ex) {
-                    Logger.getLogger(PostList.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                if (post == null || !hasPermission(user, post)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-
-                request.setAttribute("post", post);
-                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
+//                int id = Integer.parseInt(request.getParameter("id"));
+//                Post post = null;
+//                try {
+//                    post = postObjectMgmt.getById(id);
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(PostList.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//
+//                if (post == null || !hasPermission(user, post)) {
+//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//                    return;
+//                }
+//
+//                request.setAttribute("post", post);
+//                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
             }
             default -> {
-                
+
             }
         }
     }
@@ -99,63 +98,61 @@ public class PostList extends HttpServlet {
 //            response.sendError(HttpServletResponse.SC_NOT_FOUND);
 //            return;
 //        }
-        
-        if (!isAdminOrEditor(user)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
+//        if (!isAdminOrEditor(user)) {
+//            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//            return;
+//        }
 
         String action = request.getParameter("action");
 
-        try {
-            if (action.equals("create")) {
-                int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+//        try {
+//            if (action.equals("create")) {
+//                int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+//
+//                Post p = new Post(
+//                        categoryId
+//                );
+//                p.setUserId(user.getId());
+//                p.setCategoryId(categoryId);
+//                p.setTitle(request.getParameter("title"));
+//                p.setContent(request.getParameter("content"));
+//
+//                postObjectMgmt.insert(p);
+//            }
 
-                Post p = new Post(
-                        categoryId
-                );
-                p.setUserId(user.getId());
-                p.setCategoryId(categoryId);
-                p.setTitle(request.getParameter("title"));
-                p.setContent(request.getParameter("content"));
+//            if (action.equals("edit")) {
+//                int id = Integer.parseInt(request.getParameter("id"));
+//                Post post = postObjectMgmt.getById(id);
+//
+//                if (!hasPermission(user, post)) {
+//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//                    return;
+//                }
+//
+//                post.setTitle(request.getParameter("title"));
+//                post.setContent(request.getParameter("content"));
+//                postObjectMgmt.update(post);
+//            }
+//
+//            if (action.equals("hide")) {
+//                int id = Integer.parseInt(request.getParameter("id"));
+//                Post post = postObjectMgmt.getById(id);
+//
+//                if (!hasPermission(user, post)) {
+//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//                    return;
+//                }
+//
+//                postObjectMgmt.hide(id);
+//            }
 
-                postObjectMgmt.insert(p);
-            }
-
-            if (action.equals("edit")) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Post post = postObjectMgmt.getById(id);
-
-                if (!hasPermission(user, post)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-
-                post.setTitle(request.getParameter("title"));
-                post.setContent(request.getParameter("content"));
-                postObjectMgmt.update(post);
-            }
-
-            if (action.equals("hide")) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Post post = postObjectMgmt.getById(id);
-
-                if (!hasPermission(user, post)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-
-                postObjectMgmt.hide(id);
-            }
-
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (SQLException e) {
-            throw new ServletException(e);
-        }
+//            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+//
+//        } catch (NumberFormatException e) {
+//            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+//        } catch (SQLException e) {
+//            throw new ServletException(e);
+//        }
+//        }
     }
-
-
 }
