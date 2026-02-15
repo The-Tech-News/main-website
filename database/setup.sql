@@ -196,3 +196,144 @@ EXEC NewCategory 'windows', 'A category about Windows';
 GO
 EXEC NewCategory 'linux', 'A category about Linux';
 GO
+
+-- Code merge, by nguyenduyk19
+-- Some encoding and coding style has been editied, due to limitation of sqlcmd
+
+/** TABLE: Post **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE Post (
+    [id] INT IDENTITY PRIMARY KEY,
+    [userId] INT NOT NULL,
+    [categoryId] INT NOT NULL,
+    [title] NVARCHAR(100) NOT NULL,
+    [content] NVARCHAR(MAX) NOT NULL,
+    [isHidden] BIT NOT NULL DEFAULT 0
+)
+GO
+
+/** Procedure: sp_InsertPost **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE sp_InsertPost
+    @title NVARCHAR(100),
+    @content NVARCHAR(MAX),
+    @userId INT,
+    @categoryId INT
+AS
+BEGIN
+    IF (@title IS NULL OR LTRIM(RTRIM(@title)) = '') BEGIN
+        RAISERROR ('Title cannot be empty', 16, 1);
+        RETURN;
+    END
+
+    IF (@content IS NULL OR LTRIM(RTRIM(@content)) = '') BEGIN
+        RAISERROR ('Content cannot be empty', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (
+            SELECT 1 
+                FROM [User] 
+                WHERE [id] = @userId
+    ) BEGIN
+        RAISERROR ('User not found', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (
+            SELECT 1
+                FROM [Category]
+                WHERE [id] = @categoryId
+    ) BEGIN
+        RAISERROR ('Category not found', 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO [Post] ([title], [content], [userId], [categoryId])
+        VALUES (@title, @content, @userId, @categoryId);
+END
+GO
+
+/** Procedure: sp_UpdatePost **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE sp_UpdatePost
+    @postId INT,
+    @title NVARCHAR(100),
+    @content NVARCHAR(MAX),
+    @categoryId INT
+AS
+BEGIN
+    IF NOT EXISTS (
+            SELECT 1
+                FROM [Post]
+                WHERE [id] = @postId)
+        RAISERROR ('Post not found', 16, 1);
+        RETURN;
+
+    IF (@title IS NULL OR LTRIM(RTRIM(@title)) = '') BEGIN
+        RAISERROR ('Title cannot be empty', 16, 1);
+        RETURN;
+    END
+
+    IF (@content IS NULL OR LTRIM(RTRIM(@content)) = '') BEGIN
+        RAISERROR ('Content cannot be empty', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (
+            SELECT 1
+                FROM [Category]
+                WHERE [id] = @categoryId
+    ) BEGIN
+        RAISERROR ('Category not found', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (
+            SELECT 1
+                FROM [Category] 
+                WHERE [id] = @categoryId
+    ) BEGIN
+        RAISERROR ('Category is hidden', 16, 1);
+        RETURN;
+    END
+
+    UPDATE [Post]
+        SET [title] = @title, [content] = @content, [categoryId] = @categoryId
+        WHERE id = @postId;
+END
+GO
+
+/** Procedure: sp_HidePost **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE sp_HidePost
+    @postId INT
+AS
+BEGIN
+    IF NOT EXISTS (
+            SELECT 1
+                FROM [Post]
+                WHERE [id] = @postId
+    )
+    BEGIN
+        RAISERROR ('Post not found', 16, 1);
+        RETURN;
+    END
+
+    UPDATE [Post]
+        SET isHidden = 1
+        WHERE [id] = @postId
+END
+GO
