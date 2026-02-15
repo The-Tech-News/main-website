@@ -3,9 +3,6 @@ name: tech-news-instance
 services:
     db-instance:
         container_name: mssqldb
-        volumes:
-            - dbdata:/var/opt/mssql/data/
-            - dblogs:/var/opt/mssql/logs/
         networks:
             - backend
         env_file:
@@ -37,18 +34,6 @@ services:
         image: anhvlt/the-tech-news:web-latest
 
 volumes:
-    dbdata:
-        driver: local
-        driver_opts:
-            type: none
-            o: bind
-            device: ./dockervols/dbdata
-    dblogs:
-        driver: local
-        driver_opts:
-            type: none
-            o: bind
-            device: ./dockervols/dblogs
     weblogs:
         driver: local
         driver_opts:
