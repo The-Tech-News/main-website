@@ -205,7 +205,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE Post (
+CREATE TABLE [Post] (
     [id] INT IDENTITY PRIMARY KEY,
     [userId] INT NOT NULL,
     [categoryId] INT NOT NULL,
@@ -220,7 +220,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE sp_InsertPost
+CREATE OR ALTER PROCEDURE sp_InsertPost
     @title NVARCHAR(100),
     @content NVARCHAR(MAX),
     @userId INT,
@@ -265,7 +265,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE sp_UpdatePost
+CREATE OR ALTER PROCEDURE sp_UpdatePost
     @postId INT,
     @title NVARCHAR(100),
     @content NVARCHAR(MAX),
@@ -275,9 +275,11 @@ BEGIN
     IF NOT EXISTS (
             SELECT 1
                 FROM [Post]
-                WHERE [id] = @postId)
+                WHERE [id] = @postId
+    ) BEGIN
         RAISERROR ('Post not found', 16, 1);
         RETURN;
+    END
 
     IF (@title IS NULL OR LTRIM(RTRIM(@title)) = '') BEGIN
         RAISERROR ('Title cannot be empty', 16, 1);
@@ -318,7 +320,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE sp_HidePost
+CREATE OR ALTER PROCEDURE sp_HidePost
     @postId INT
 AS
 BEGIN
@@ -336,4 +338,7 @@ BEGIN
         SET isHidden = 1
         WHERE [id] = @postId
 END
+GO
+
+EXECUTE sp_InsertPost 'About Windows', 'Windows is an operating system by Microsoft', 1, 1;
 GO
