@@ -15,7 +15,7 @@ public class Category extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private final String nameRegex = "^[A-Za-z0-9]+$";
-    private final String descriptionRegex = "^[\\p{L}\\. ]+$";
+    private final String descriptionRegex = "^[0-9\\p{L}\\. ]+$";
     
     private final CategoryDAO categoryObjectMgmt;
     
@@ -31,6 +31,9 @@ public class Category extends HttpServlet {
             response.sendError(500, "Required parameter is null, please check the input");
             return;
         }
+        
+        System.out.println("Is name matches regex: " + name.matches(nameRegex));
+        System.out.println("Is description matches regex: " + description.matches(descriptionRegex));
         
         if (!name.matches(nameRegex) || !description.matches(descriptionRegex)) {
             response.sendError(500, "Required parameter is not in the compliance format. Please check the input");
@@ -62,7 +65,7 @@ public class Category extends HttpServlet {
         
         int sqlExec = this.categoryObjectMgmt.EditCategory(oldName, newName, description);
         if (sqlExec != 0) {
-            response.sendError(500, "The category could not be created");
+            response.sendError(500, "The category could not be editied");
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/category?action=list");
         }
@@ -93,6 +96,7 @@ public class Category extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/category?action=list");
             }
             case "list" -> {
+                request.setAttribute("CategoryList", this.categoryObjectMgmt.GetListCategory());
                 request.getRequestDispatcher("/WEB-INF/JSPViews/CategoryView/List.jsp").forward(request, response);
             }
             case "create" -> {
@@ -109,6 +113,10 @@ public class Category extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (!this.HasPermission(request)) {
+            request.getRequestDispatcher("/WEB-INF/JSPViews/CategoryView/NoPermission.jsp").forward(request, response);
+        }
+        
         switch (request.getParameter("action")) {
             case "create" -> {
                 this.CreateCategory(request, response);

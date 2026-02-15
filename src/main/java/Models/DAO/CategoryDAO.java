@@ -20,10 +20,13 @@ public class CategoryDAO extends DBContext {
                             """;
 
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand); ResultSet rs = ps.executeQuery()) {
-            int id = rs.getInt("id");
-            String name = rs.getString("name");
-            String description = rs.getString("description");
-            catList.add(new Category(id, name, description));
+            while (rs.next()) {
+                catList.add(new Category(
+                    rs.getInt("id"), 
+                    rs.getString("name"), 
+                    rs.getString("description")
+                ));
+            }
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
@@ -62,11 +65,11 @@ public class CategoryDAO extends DBContext {
 
         String sqlCommand = """
                             DECLARE	@return_value int;
-                            EXEC	@return_value = [technewsdb].[dbo].[EditCategory]
-                                        @oldName = ?,
-                                        @newName = ?
-                                        @description = ?;
-                            SELECT	'retval' = @return_value;
+                            EXEC	@return_value = [dbo].[EditCategory]
+                                    @oldName = ?,
+                                    @newName = ?,
+                                    @description = ?;
+                            SELECT  "retval" = @return_value;
                             """;
 
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
