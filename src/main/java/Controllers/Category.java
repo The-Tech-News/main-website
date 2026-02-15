@@ -32,9 +32,6 @@ public class Category extends HttpServlet {
             return;
         }
         
-        System.out.println("Is name matches regex: " + name.matches(nameRegex));
-        System.out.println("Is description matches regex: " + description.matches(descriptionRegex));
-        
         if (!name.matches(nameRegex) || !description.matches(descriptionRegex)) {
             response.sendError(500, "Required parameter is not in the compliance format. Please check the input");
             return;
