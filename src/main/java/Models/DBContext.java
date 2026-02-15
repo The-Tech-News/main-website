@@ -26,7 +26,7 @@ public class DBContext {
             DB_PORT,
             DB_NAME
         );
-
+        
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             this.conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PWD);
