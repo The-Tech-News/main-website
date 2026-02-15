@@ -12,12 +12,14 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @WebServlet(name = "PostList", urlPatterns = {"/admin/posts"})
 public class PostList extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
 
     private final PostDAO postObjectMgmt;
 
@@ -26,27 +28,36 @@ public class PostList extends HttpServlet {
     }
     
     private boolean IsAuthenticated(HttpSession session) {
-        return session == null || session.getAttribute("user") == null;
+        return session == null || session.getAttribute("loggedUser") == null;
+    }
+
+    private boolean isAdminOrEditor(User user) {
+        return user.getGroupId() == 1 || user.getGroupId() == 2;
+    }
+
+    private boolean hasPermission(User user, Post post) {
+        if (user.getGroupId() == 1) {
+            return true;
+        }
+        return user.getGroupId() == 2 && post.getUserId() == user.getId();
     }
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
+//        HttpSession session = request.getSession(false);
+//        
+//        if (!this.IsAuthenticated(session)) {
+//            response.sendError(500, "User is not authenticated");
+//            return;
+//        }
         
-        if (!this.IsAuthenticated(session)) {
-            response.sendError(500, "User is not authenticated");
-            return;
-        }
-
-        User user = (User) session.getAttribute("loggedUser");
-
         switch (request.getParameter("action")) {
             case null -> {
                 response.sendRedirect("/admin/posts?action=list");
             }
             case "list" -> {
-                List<Post> posts = postObjectMgmt.getAll();
+                ArrayList<Post> posts = postObjectMgmt.GetAll();
                 request.setAttribute("posts", posts);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/List.jsp").forward(request, response);
             }
@@ -83,13 +94,12 @@ public class PostList extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        User user = (User) session.getAttribute("user");
+//        HttpSession session = request.getSession(false);
+//        if (session == null || session.getAttribute("user") == null) {
+//            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+//            return;
+//        }
+        
         if (!isAdminOrEditor(user)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -101,7 +111,9 @@ public class PostList extends HttpServlet {
             if (action.equals("create")) {
                 int categoryId = Integer.parseInt(request.getParameter("categoryId"));
 
-                Post p = new Post();
+                Post p = new Post(
+                        categoryId
+                );
                 p.setUserId(user.getId());
                 p.setCategoryId(categoryId);
                 p.setTitle(request.getParameter("title"));
@@ -145,14 +157,5 @@ public class PostList extends HttpServlet {
         }
     }
 
-    private boolean isAdminOrEditor(User user) {
-        return user.getGroupId() == 1 || user.getGroupId() == 2;
-    }
 
-    private boolean hasPermission(User user, Post post) {
-        if (user.getGroupId() == 1) {
-            return true;
-        }
-        return user.getGroupId() == 2 && post.getUserId() == user.getId();
-    }
 }

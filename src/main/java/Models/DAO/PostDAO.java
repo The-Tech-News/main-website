@@ -7,35 +7,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PostDAO extends DBContext {
 
-    public List<Post> getAll() {
-        List<Post> list = new ArrayList<>();
-        
-        String sql =    """
-                        SELECT [id], [userId], [category], [title], [content], [isHidden]
-                            FROM [technewsdb].[dbo].[Post];
-                        """;
+    public ArrayList<Post> GetAll() {
+        ArrayList<Post> list = new ArrayList<>();
+
+        String sql = """
+                    SELECT [id],[userId], [categoryId], [title], [content], [isHidden]
+                        FROM [technewsdb].[dbo].[Post];
+                    """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new Post(
-                            rs.getInt("id"),
-                            rs.getInt("userId"),
-                            rs.getInt("categoryId"),
-                            rs.getString("title"),
-                            rs.getString("content"),
-                            rs.getBoolean("isHidden")
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getInt("categoryId"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getBoolean("isHidden")
                 ));
             }
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return list;
     }
 
@@ -43,8 +42,10 @@ public class PostDAO extends DBContext {
         String sql = """
                     DECLARE	@return_value int;
                     EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
-                            @name = ?,
-                            @description = ?;
+                                @title = ?,
+                                @content = ?,
+                                @userId = ?,
+                                @categoryId = ?;
                     SELECT	'retval' = @return_value;
                     """;
 
