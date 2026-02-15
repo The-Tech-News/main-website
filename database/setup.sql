@@ -140,6 +140,7 @@ AS BEGIN
     INSERT INTO [Category] ([name], [description])
         VALUES (@name, @description);
 END
+GO
 
 /** Procedure: EditCategory **/
 SET ANSI_NULLS ON
@@ -189,6 +190,7 @@ AS BEGIN
         SET [name] = @newName, [description] = @description
         WHERE [id] = @id
 END
+GO
 
 EXEC NewCategory 'windows', 'A category about Windows';
 GO
