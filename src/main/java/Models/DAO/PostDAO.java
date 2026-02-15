@@ -2,40 +2,51 @@ package Models.DAO;
 
 import Models.DBContext;
 import Models.Objects.Post;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PostDAO extends DBContext {
 
-    public List<Post> getAll() throws SQLException {
+    public List<Post> getAll() {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM PostList WHERE hidden = 0";
+        
+        String sql =    """
+                        SELECT [id], [userId], [category], [title], [content], [isHidden]
+                            FROM [technewsdb].[dbo].[Post];
+                        """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
+        try (PreparedStatement ps = getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Post p = new Post(
-                        rs.getInt("id"),
-                        rs.getInt("userId"),
-                        rs.getInt("categoryId"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getBoolean("hidden")
-                );
-                list.add(p);
+                list.add(new Post(
+                            rs.getInt("id"),
+                            rs.getInt("userId"),
+                            rs.getInt("categoryId"),
+                            rs.getString("title"),
+                            rs.getString("content"),
+                            rs.getBoolean("isHidden")
+                ));
             }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
+        
         return list;
     }
 
-    public void insert(Post p) throws SQLException {
+    public void insert(Post p) {
         String sql = """
-            INSERT INTO PostList(userId, categoryId, title, content, hidden)
-            VALUES (?, ?, ?, ?, 0)
-        """;
+                    DECLARE	@return_value int;
+                    EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
+                            @name = ?,
+                            @description = ?;
+                    SELECT	'retval' = @return_value;
+                    """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, p.getUserId());
@@ -43,6 +54,8 @@ public class PostDAO extends DBContext {
             ps.setString(3, p.getTitle());
             ps.setString(4, p.getContent());
             ps.executeUpdate();
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
     }
 

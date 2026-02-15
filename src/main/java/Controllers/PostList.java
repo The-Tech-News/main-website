@@ -5,52 +5,66 @@ import Models.Objects.Post;
 import Models.Objects.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@WebServlet("/admin/posts")
-public class PostListServlet extends HttpServlet {
+@WebServlet(name = "PostList", urlPatterns = {"/admin/posts"})
+public class PostList extends HttpServlet {
 
-    private final PostDAO postDAO = new PostDAO();
+    private final PostDAO postObjectMgmt;
 
+    public PostList() {
+        this.postObjectMgmt = new PostDAO();
+    }
+    
+    private boolean IsAuthenticated(HttpSession session) {
+        return session == null || session.getAttribute("user") == null;
+    }
+    
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        
+        if (!this.IsAuthenticated(session)) {
+            response.sendError(500, "User is not authenticated");
             return;
         }
 
-        User user = (User) session.getAttribute("user");
-        String action = request.getParameter("action");
+        User user = (User) session.getAttribute("loggedUser");
 
-        try {
-            if (action == null || action.equals("list")) {
-                List<Post> posts = postDAO.getAll();
-                request.setAttribute("posts", posts);
-                request.getRequestDispatcher("/WEB-INF/PostListView/list.jsp")
-                        .forward(request, response);
-                return;
+        switch (request.getParameter("action")) {
+            case null -> {
+                response.sendRedirect("/admin/posts?action=list");
             }
-
-            if (action.equals("create")) {
+            case "list" -> {
+                List<Post> posts = postObjectMgmt.getAll();
+                request.setAttribute("posts", posts);
+                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/List.jsp").forward(request, response);
+            }
+            case "create" -> {
                 if (!isAdminOrEditor(user)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-                request.getRequestDispatcher("/WEB-INF/PostListView/create.jsp")
-                        .forward(request, response);
-                return;
+                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
             }
-
-            if (action.equals("edit")) {
+            case "edit" -> {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Post post = postDAO.getById(id);
+                Post post = null;
+                try {
+                    post = postObjectMgmt.getById(id);
+                } catch (SQLException ex) {
+                    Logger.getLogger(PostList.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
                 if (post == null || !hasPermission(user, post)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -58,19 +72,16 @@ public class PostListServlet extends HttpServlet {
                 }
 
                 request.setAttribute("post", post);
-                request.getRequestDispatcher("/WEB-INF/PostListView/edit.jsp")
-                        .forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
             }
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (SQLException e) {
-            throw new ServletException(e);
+            default -> {
+                
+            }
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
@@ -96,12 +107,12 @@ public class PostListServlet extends HttpServlet {
                 p.setTitle(request.getParameter("title"));
                 p.setContent(request.getParameter("content"));
 
-                postDAO.insert(p);
+                postObjectMgmt.insert(p);
             }
 
             if (action.equals("edit")) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Post post = postDAO.getById(id);
+                Post post = postObjectMgmt.getById(id);
 
                 if (!hasPermission(user, post)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -110,19 +121,19 @@ public class PostListServlet extends HttpServlet {
 
                 post.setTitle(request.getParameter("title"));
                 post.setContent(request.getParameter("content"));
-                postDAO.update(post);
+                postObjectMgmt.update(post);
             }
 
             if (action.equals("hide")) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Post post = postDAO.getById(id);
+                Post post = postObjectMgmt.getById(id);
 
                 if (!hasPermission(user, post)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
 
-                postDAO.hide(id);
+                postObjectMgmt.hide(id);
             }
 
             response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
@@ -139,7 +150,9 @@ public class PostListServlet extends HttpServlet {
     }
 
     private boolean hasPermission(User user, Post post) {
-        if (user.getGroupId() == 1) return true;
+        if (user.getGroupId() == 1) {
+            return true;
+        }
         return user.getGroupId() == 2 && post.getUserId() == user.getId();
     }
 }
