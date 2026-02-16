@@ -89,7 +89,48 @@ public class PostList extends HttpServlet {
     }
     
     private void EditPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String title = request.getParameter("title");
+        String content = request.getParameter("content");
+        int id = -1;
+        int categoryId = -1;
         
+        try {
+            String idStr = request.getParameter("id");
+            String categoryIdStr = request.getParameter("categoryId");
+            
+            if (idStr == null || categoryIdStr == null) {
+                response.sendError(500, "Either User ID or Category ID is not specified");
+                return;
+            }
+            
+            if (!idStr.matches(this.numberRegex) || !categoryIdStr.matches(this.numberRegex)) {
+                response.sendError(500, "Either User ID or Category ID must be a number");
+                return;
+            }
+            
+            id = Integer.parseInt(idStr);
+            categoryId = Integer.parseInt(categoryIdStr);
+        } catch (NumberFormatException numex) {
+            response.sendError(500, "Unable to parse Id as integer");
+            return;
+        }
+        
+        if (title == null || content == null) {
+            response.sendError(500, "Either title or content should be not null");
+            return;
+        }
+        
+        if (id == -1 || categoryId == -1) {
+            response.sendError(500, "Either title or content should be not null");
+            return;
+        }
+        
+        int executeQue = this.postObjectMgmt.UpdatePost(id, title, content, categoryId);
+        if (executeQue != 0) {
+            response.sendError(500, "The category could not be editied");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        }
     }
     
     @Override
@@ -118,21 +159,19 @@ public class PostList extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
             }
             case "edit" -> {
-//                int id = Integer.parseInt(request.getParameter("id"));
-//                Post post = null;
-//                try {
-//                    post = postObjectMgmt.getById(id);
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(PostList.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//
-//                if (post == null || !hasPermission(user, post)) {
-//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//                    return;
-//                }
-//
-//                request.setAttribute("post", post);
-//                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
+                try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    Post post = this.postObjectMgmt.GetPostById(id);
+                    ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
+                    request.setAttribute("categories", categories);
+                    request.setAttribute("post", post);
+                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
+                } catch (NumberFormatException numEx) {
+                    response.sendError(500, numEx.getLocalizedMessage());
+                }
+            }
+            case "hide" -> {
+                
             }
             default -> {
                 
@@ -155,7 +194,7 @@ public class PostList extends HttpServlet {
                 this.CreatePost(request, response);
             }
             case "edit" -> {
-                
+                this.EditPost(request, response);
             }
             case "hide" -> {
                 

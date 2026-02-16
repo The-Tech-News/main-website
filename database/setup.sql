@@ -300,15 +300,6 @@ BEGIN
         RETURN;
     END
 
-    IF EXISTS (
-            SELECT 1
-                FROM [Category] 
-                WHERE [id] = @categoryId
-    ) BEGIN
-        RAISERROR ('Category is hidden', 16, 1);
-        RETURN;
-    END
-
     UPDATE [Post]
         SET [title] = @title, [content] = @content, [categoryId] = @categoryId
         WHERE id = @postId;
