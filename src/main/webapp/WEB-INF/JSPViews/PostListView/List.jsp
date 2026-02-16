@@ -26,7 +26,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group">
                                             <a href="<%= request.getContextPath() %>/admin/posts?action=edit&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                            <a href="<%= request.getContextPath() %>/admin/posts?action=delete&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">Delete</a>
+                                            <a href="<%= request.getContextPath() %>/admin/posts?action=hide&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">Hide</a>
                                         </div>
                                         <small class="text-body-secondary">By user Id <%= p.getUserId() %></small>
                                     </div>

@@ -133,6 +133,41 @@ public class PostList extends HttpServlet {
         }
     }
     
+    private void HidePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int id = -1;
+        
+        try {
+            String idStr = request.getParameter("id");
+            
+            if (idStr == null) {
+                response.sendError(500, "Either User ID or Category ID is not specified");
+                return;
+            }
+            
+            if (!idStr.matches(this.numberRegex)) {
+                response.sendError(500, "Either User ID must be a number");
+                return;
+            }
+            
+            id = Integer.parseInt(idStr);
+        } catch (NumberFormatException numex) {
+            response.sendError(500, "Unable to parse Id as integer");
+            return;
+        }
+        
+        if (id == -1) {
+            response.sendError(500, "Either title or content should be not null");
+            return;
+        }
+        
+        int executeQue = this.postObjectMgmt.HidePost(id);
+        if (executeQue != 0) {
+            response.sendError(500, "The category could not be hiden");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+        }
+    }
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
@@ -171,10 +206,16 @@ public class PostList extends HttpServlet {
                 }
             }
             case "hide" -> {
-                
+                try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    request.setAttribute("id", id);
+                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Hide.jsp").forward(request, response);
+                } catch (NumberFormatException numEx) {
+                    response.sendError(500, numEx.getLocalizedMessage());
+                }
             }
             default -> {
-                
+                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             }
         }
     }
@@ -197,7 +238,7 @@ public class PostList extends HttpServlet {
                 this.EditPost(request, response);
             }
             case "hide" -> {
-                
+                this.HidePost(request, response);
             }
             default -> {
                 response.setStatus(404);

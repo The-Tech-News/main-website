@@ -161,12 +161,29 @@ public class PostListDAO extends DBContext {
         return returnValue;
     }
 
-    public void hide(int id) throws SQLException {
-        String sql = "UPDATE PostList SET hidden = 1 WHERE id = ?";
+    public int HidePost(int id) {
+        int returnValue = -1;
+        
+        String sqlCommand = """
+                            DECLARE	@return_value int;
+                            EXEC	@return_value = [technewsdb].[dbo].[sp_HidePost]
+                                        @postId = ?;
+                            SELECT	'retval' = @return_value;
+                            """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sqlCommand)) {
             ps.setInt(1, id);
-            ps.executeUpdate();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    returnValue = rs.getInt("retval");
+                }
+            } catch (SQLException sqlEx) {
+                Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
+        
+        return returnValue;
     }
 }
