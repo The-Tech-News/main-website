@@ -67,41 +67,68 @@ public class PostListDAO extends DBContext {
         return posts;
     }
 
-    public void insert(Post p) {
-        String sql = """
-                    DECLARE	@return_value int;
-                    EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
-                                @title = ?,
-                                @content = ?,
-                                @userId = ?,
-                                @categoryId = ?;
-                    SELECT	'retval' = @return_value;
-                    """;
+    public int InsertPost(String title, String content, int userId, int categoryId) {
+        int returnValue = -1;
+        
+        String sqlCommand = """
+                            DECLARE	@return_value int;
+                            EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
+                                        @title = ?,
+                                        @content = ?,
+                                        @userId = ?,
+                                        @categoryId = ?;
+                            SELECT	'retval' = @return_value;
+                            """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, p.getUserId());
-            ps.setInt(2, p.getCategoryId());
-            ps.setString(3, p.getTitle());
-            ps.setString(4, p.getContent());
-            ps.executeUpdate();
+        try (PreparedStatement ps = getConnection().prepareStatement(sqlCommand)) {
+            ps.setString(1, title);
+            ps.setString(2, content);
+            ps.setInt(3, userId);
+            ps.setInt(4, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    returnValue = rs.getInt("retval");
+                }
+            } catch (SQLException sqlEx) {
+                Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+            }
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
+        
+        return returnValue;
     }
 
-    public void update(Post p) throws SQLException {
-        String sql = """
-                        UPDATE PostList
-                        SET title = ?, content = ?
-                        WHERE id = ?
-                    """;
+    public int UpdatePost(int id, String title, String content, int categoryId) {
+        int returnValue = -1;
+        
+        String sqlCommand = """
+                            DECLARE	@return_value int;
+                            EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
+                                        @postId = ?,
+                                        @title = ?,
+                                        @content = ?,
+                                        @categoryId = ?;
+                            SELECT	'retval' = @return_value;
+                            """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setString(1, p.getTitle());
-            ps.setString(2, p.getContent());
-            ps.setInt(3, p.getId());
-            ps.executeUpdate();
+        try (PreparedStatement ps = getConnection().prepareStatement(sqlCommand)) {
+            ps.setInt(1, id);
+            ps.setString(2, title);
+            ps.setString(3, content);
+            ps.setInt(4, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    returnValue = rs.getInt("retval");
+                }
+            } catch (SQLException sqlEx) {
+                Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
+        
+        return returnValue;
     }
 
     public void hide(int id) throws SQLException {

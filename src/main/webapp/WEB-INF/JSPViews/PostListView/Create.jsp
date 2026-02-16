@@ -22,12 +22,12 @@
                     <textarea class="form-control" id="content" name="content" rows="3"></textarea>
                 </div>
                 <div class="mb-3">
-                    <label for="id" class="form-label">User ID</label>
-                    <input type="text" id="id" name="id" class="form-control" value="<%= request.getAttribute("userId") %>">
+                    <label for="userId" class="form-label">User ID</label>
+                    <input type="text" id="userId" name="userId" class="form-control" value="<%= request.getAttribute("userId") %>" readonly>
                 </div>
-                <div class="input-group mb-3">
+                <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category">
+                    <select class="form-select" id="categoryId" name="categoryId">
                         <option selected>Choose...</option>
                         <%
                             ArrayList<Category> categories = (ArrayList<Category>) request.getAttribute("categories");
