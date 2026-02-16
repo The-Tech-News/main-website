@@ -4,11 +4,11 @@ public class Post {
 
     private final int id;
     private final int userId;
-    private final int categoryId;
+    private int categoryId;
     private String title;
     private String content;
     private boolean isHidden;
- 
+
     public Post(int id, int userId, int categoryId, String title, String content, boolean isHidden) {
         this.id = id;
         this.userId = userId;
@@ -52,5 +52,9 @@ public class Post {
 
     public void setHidden(boolean isHidden) {
         this.isHidden = isHidden;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 }
