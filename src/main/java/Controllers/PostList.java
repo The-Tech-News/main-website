@@ -223,7 +223,6 @@ public class PostList extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        User u = (User) session.getAttribute("loggedUser");
         
         if (!this.IsAuthenticated(session)) {
             request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
