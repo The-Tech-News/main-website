@@ -1,6 +1,7 @@
 package Controllers;
 
-import Models.DAO.PostDAO;
+import Models.DAO.CategoryDAO;
+import Models.DAO.PostListDAO;
 import Models.Objects.Post;
 import Models.Objects.User;
 import jakarta.servlet.ServletException;
@@ -21,51 +22,52 @@ public class PostList extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final PostDAO postObjectMgmt;
+    private final PostListDAO postObjectMgmt;
+    private final CategoryDAO categoryObjectMgmt;
 
     public PostList() {
-        this.postObjectMgmt = new PostDAO();
+        this.postObjectMgmt = new PostListDAO();
+        this.categoryObjectMgmt = new CategoryDAO();
     }
-
+    
     private boolean IsAuthenticated(HttpSession session) {
-        return session == null || session.getAttribute("loggedUser") == null;
+        User u = (User) session.getAttribute("loggedUser");
+        return (u != null);
     }
-
-    private boolean isAdminOrEditor(User user) {
-        return user.getGroupId() == 1 || user.getGroupId() == 2;
-    }
-
-    private boolean hasPermission(User user, Post post) {
-        if (user.getGroupId() == 1) {
-            return true;
+    
+    private boolean IsAdmin(HttpSession session) {
+        User u = (User) session.getAttribute("loggedUser");
+        if (!this.IsAuthenticated(session)) {
+            return false;
         }
-        return user.getGroupId() == 2 && post.getUserId() == user.getId();
+        
+        return (u.getId() == 1);
     }
-
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        HttpSession session = request.getSession(false);
-//        
-//        if (!this.IsAuthenticated(session)) {
-//            response.sendError(500, "User is not authenticated");
-//            return;
-//        }
-
+        HttpSession session = request.getSession(false);
+        User u = (User) session.getAttribute("loggedUser");
+        
+        if (!this.IsAuthenticated(session)) {
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
+            return;
+        }
+        
         switch (request.getParameter("action")) {
             case null -> {
                 response.sendRedirect("/admin/posts?action=list");
             }
             case "list" -> {
-                ArrayList<Post> posts = postObjectMgmt.GetAll();
+                ArrayList<Post> posts = (IsAdmin(session)) ? postObjectMgmt.GetAll() : postObjectMgmt.GetPostsByUserId(u.getId());
                 request.setAttribute("posts", posts);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/List.jsp").forward(request, response);
             }
             case "create" -> {
-//                if (!isAdminOrEditor(user)) {
-//                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//                    return;
-//                }
-//                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
+                ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
+                request.setAttribute("categories", categories);
+                request.setAttribute("userId", u.getId());
+                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
             }
             case "edit" -> {
 //                int id = Integer.parseInt(request.getParameter("id"));
@@ -85,7 +87,7 @@ public class PostList extends HttpServlet {
 //                request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
             }
             default -> {
-
+                
             }
         }
     }
@@ -102,7 +104,12 @@ public class PostList extends HttpServlet {
 //            response.sendError(HttpServletResponse.SC_FORBIDDEN);
 //            return;
 //        }
-
+        
+        HttpSession session = request.getSession(false);
+        if (!this.IsAuthenticated(session)) {
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
+            return;
+        }
         String action = request.getParameter("action");
 
 //        try {
@@ -152,7 +159,6 @@ public class PostList extends HttpServlet {
 //            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 //        } catch (SQLException e) {
 //            throw new ServletException(e);
-//        }
 //        }
     }
 }

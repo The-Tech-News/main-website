@@ -5,22 +5,21 @@ import Models.Objects.Post;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PostDAO extends DBContext {
+public class PostListDAO extends DBContext {
 
     public ArrayList<Post> GetAll() {
         ArrayList<Post> list = new ArrayList<>();
 
-        String sql = """
-                    SELECT [id],[userId], [categoryId], [title], [content], [isHidden]
-                        FROM [technewsdb].[dbo].[Post];
-                    """;
+        String sqlCommand = """
+                            SELECT [id],[userId], [categoryId], [title], [content], [isHidden]
+                                FROM [technewsdb].[dbo].[Post];
+                            """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sqlCommand); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new Post(
                         rs.getInt("id"),
@@ -36,6 +35,36 @@ public class PostDAO extends DBContext {
         }
 
         return list;
+    }
+
+    public ArrayList<Post> GetPostsByUserId(int userId) {
+        ArrayList<Post> posts = new ArrayList<>();
+
+        String sqlCommand = """
+                            SELECT [id], [userId], [categoryId], [title], [content], [isHidden]
+                                FROM [technewsdb].[dbo].[Post]
+                                WHERE [userId] = ?;
+                            """;
+
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    posts.add(new Post(
+                            rs.getInt("id"),
+                            rs.getInt("userId"),
+                            rs.getInt("categoryId"),
+                            rs.getString("title"),
+                            rs.getString("content"),
+                            rs.getBoolean("isHidden")
+                    ));
+                }
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+
+        return posts;
     }
 
     public void insert(Post p) {
@@ -60,34 +89,12 @@ public class PostDAO extends DBContext {
         }
     }
 
-    public Post getById(int id) throws SQLException {
-        String sql = "SELECT * FROM PostList WHERE id = ?";
-
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, id);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Post(
-                            rs.getInt("id"),
-                            rs.getInt("userId"),
-                            rs.getInt("categoryId"),
-                            rs.getString("title"),
-                            rs.getString("content"),
-                            rs.getBoolean("hidden")
-                    );
-                }
-            }
-        }
-        return null;
-    }
-
     public void update(Post p) throws SQLException {
         String sql = """
-            UPDATE PostList
-            SET title = ?, content = ?
-            WHERE id = ?
-        """;
+                        UPDATE PostList
+                        SET title = ?, content = ?
+                        WHERE id = ?
+                    """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setString(1, p.getTitle());
