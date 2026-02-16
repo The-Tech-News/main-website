@@ -1,8 +1,6 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="Models.Objects.Post"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,31 +11,35 @@
 <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <h2>Post List</h2>
-            <br>
-            <button type="button" class="btn btn-primary">Create new post</button>
-            <div class="my-3 p-3 bg-body rounded shadow-sm">
-                <div class="list-group">
-                    <% 
-                        ArrayList<Post> posts = (ArrayList<Post>) request.getAttribute("posts");
-                        for (Post p : posts) {
-                    %>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1"><%= p.getTitle() %></h5>
+            <a href="<%= request.getContextPath() %>/admin/posts?action=create" class="btn btn-primary">Create new post</a>
+            <div class="album py-5">
+                <div class="container">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                        <% 
+                            ArrayList<Post> posts = (ArrayList<Post>) request.getAttribute("posts");
+                            for (Post p : posts) {
+                        %>
+                        <div class="col">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <p class="card-text"><%= p.getTitle() %></p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="btn-group">
+                                            <a href="<%= request.getContextPath() %>/admin/posts?action=edit&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <a href="<%= request.getContextPath() %>/admin/posts?action=delete&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">Delete</a>
+                                        </div>
+                                        <small class="text-body-secondary">By user Id <%= p.getUserId() %></small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mb-1">By user: <%= p.getUserId() %></p>
-                        <p class="mb-1">Hidden: <%= p.isHidden() %></p>
-                        <button type="button" class="btn btn-primary">Edit</button>
-                        <button type="button" class="btn btn-danger">Delete</button>
-                    </a>
-                    <%
-                        }
-                    %>
+                        <%
+                            }
+                        %>
+                    </div>
                 </div>
             </div>
         </div>
 <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>
-
-
