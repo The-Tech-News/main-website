@@ -13,7 +13,7 @@
                     <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Đăng Ký tài khoản mới</h1>
                 </div>
                 <div class="col-md-10 mx-auto col-lg-5">
-                    <form id="hashForm" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="/auth?action=signup" method="POST">
+                    <form id="hashForm" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="<%= request.getContextPath()%>/auth?action=signup" method="POST">
                         <div class="form-floating mb-3"> 
                             <input name="name" type="text" class="form-control" id="name"> 
                             <label for="floatingInput">Họ và Tên</label> 

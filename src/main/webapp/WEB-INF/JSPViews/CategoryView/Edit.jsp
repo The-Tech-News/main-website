@@ -9,7 +9,7 @@
 <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <div class="my-3 p-3 bg-body rounded shadow-sm">
-                <form id="hashForm" class="p-4 p-md-5 rounded-3" action="/admin/category?action=edit" method="POST">
+                <form id="hashForm" class="p-4 p-md-5 rounded-3" action="<%= request.getContextPath()%>/admin/category?action=edit" method="POST">
                     <h2>Sửa đổi category</h2>
                     <br>
                     <div class="form-floating mb-3"> 

@@ -14,7 +14,7 @@
                     <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Đăng nhập vào tài khoản của bạn</h1>
                 </div>
                 <div class="col-md-10 mx-auto col-lg-5">
-                    <form id="hashForm" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="/auth?action=signin" method="POST">
+                    <form id="hashForm" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" action="<%= request.getContextPath()%>/auth?action=signin" method="POST">
                         <div class="form-floating mb-3"> 
                             <input name="email" type="email" class="form-control" id="email"> 
                             <label for="floatingInput">Email</label> 

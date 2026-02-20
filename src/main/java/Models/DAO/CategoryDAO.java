@@ -22,9 +22,9 @@ public class CategoryDAO extends DBContext {
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 catList.add(new Category(
-                    rs.getInt("id"), 
-                    rs.getString("name"), 
-                    rs.getString("description")
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description")
                 ));
             }
         } catch (SQLException sqlEx) {

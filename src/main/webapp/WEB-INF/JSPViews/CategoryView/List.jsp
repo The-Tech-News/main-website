@@ -24,7 +24,7 @@
                             <strong class="text-gray-dark">
                                 <code><%= c.getName() %></code>
                             </strong>
-                            <a href="/admin/category?action=edit&oldName=<%= c.getName() %>">Edit <%= c.getName() %></a>
+                            <a href="<%= request.getContextPath()%>/admin/category?action=edit&oldName=<%= c.getName() %>">Edit <%= c.getName() %></a>
                         </div>
                         <span class="d-block"><%= c.getDescription() %></span>
                     </div>
@@ -33,7 +33,7 @@
                     }
                 %>
                 <small class="d-block text-end mt-3">
-                    <a href="/admin/category?action=create">Add new category</a>
+                    <a href="<%= request.getContextPath()%>/admin/category?action=create">Add new category</a>
                 </small>
             </div>
         </div>
