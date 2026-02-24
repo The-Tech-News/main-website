@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 public class Auth extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private final String[] cookieHeadName = {"email", "pwdHash", "name", "groupId", "isLogin"};
+    private final String[] cookieHeadName = {"email", "name"};
     private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,10}$";
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
@@ -85,7 +85,6 @@ public class Auth extends HttpServlet {
             response.setStatus(200);
             
             response.addCookie(this.RequestNewCookie("email", user.getEmail(), request.getContextPath()));
-            response.addCookie(this.RequestNewCookie("pwdHash", user.getPwdHash(), request.getContextPath()));
             response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
             
             HttpSession session = request.getSession();
