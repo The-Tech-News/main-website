@@ -25,6 +25,9 @@
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button> 
                     </form>
+                    <div class="border rounded-3 bg-body-tertiary"> 
+                        <a class="btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Login with Keycloak</a>
+                    </div>
                 </div>
             </div>
         </div>
