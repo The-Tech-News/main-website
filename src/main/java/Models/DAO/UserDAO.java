@@ -40,6 +40,36 @@ public class UserDAO extends DBContext {
         return user;
     }
     
+    // Get user by email (no password check)
+    public User GetUserByEmail(String email) {
+        User user = null;
+
+        String sqlCommand = """
+                            SELECT TOP (1) [id], [email], [pwdHash], [name], [isEnabled], [groupId]
+                                FROM [technewsdb].[dbo].[User]
+                                WHERE [email] = ? AND isEnabled = 1;
+                            """;
+
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = new User(
+                            rs.getInt("id"),
+                            rs.getString("email"),
+                            rs.getString("pwdHash"),
+                            rs.getString("name"),
+                            rs.getInt("groupId")
+                    );
+                }
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+
+        return user;
+    }
+    
     // User Sign up (Proc)
     public int CreateNewUser(String email, String pwdHash, String name) {
         int returnValue = -1;
@@ -69,4 +99,6 @@ public class UserDAO extends DBContext {
         
         return returnValue;
     }
+
+
 }
