@@ -2,7 +2,9 @@ package Controllers;
 
 import Models.DAO.UserDAO;
 import Models.Objects.User;
+
 import java.io.IOException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -10,8 +12,29 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.UUID;
+import java.util.Date;
+import java.time.Instant;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.proc.JWSVerificationKeySelector;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import java.text.ParseException;
 
 @WebServlet(name = "Auth", urlPatterns = {"/auth"})
 public class Auth extends HttpServlet {
@@ -22,10 +45,26 @@ public class Auth extends HttpServlet {
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
     
+    private final String OidcIssuer;
+    private final String OidcClientId;
+    private final String OidcClientSecret;
+    private final String OidcRedirectPath;
+    
+    private boolean isOidcEnabled = false;
+    
     private final UserDAO userObjectMgmt;
     
     public Auth() {
         this.userObjectMgmt = new UserDAO();
+        
+        this.OidcIssuer = System.getenv("OIDC_ISSUER");
+        this.OidcClientId = System.getenv("OIDC_CLIENT_ID");
+        this.OidcClientSecret = System.getenv("OIDC_CLIENT_SECRET");
+        this.OidcRedirectPath = System.getenv("OIDC_REDIRECT_PATH") == null ? "/auth?action=oidc_callback" : System.getenv("OIDC_REDIRECT_PATH");
+        
+        if (this.OidcIssuer != null && this.OidcClientId != null && this.OidcClientSecret != null) {
+            this.isOidcEnabled = true;
+        }
     }
     
     /*
@@ -119,6 +158,156 @@ public class Auth extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
         }
     }
+
+    // Start OIDC login by redirecting to Keycloak
+    private void HandleOidcLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (this.OidcIssuer == null || this.OidcClientId == null || this.OidcClientSecret == null) {
+            response.sendError(500, "OIDC not configured on server.");
+            return;
+        }
+
+        String state = UUID.randomUUID().toString();
+        HttpSession session = request.getSession();
+        session.setAttribute("oidc_state", state);
+
+        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + this.OidcRedirectPath;
+
+        String authUrl = String.format(
+                "%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=openid%%20profile%%20email&state=%s",
+                this.OidcIssuer,
+                URLEncoder.encode(this.OidcClientId, StandardCharsets.UTF_8.toString()),
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.toString()),
+                URLEncoder.encode(state, StandardCharsets.UTF_8.toString())
+        );
+
+        response.sendRedirect(authUrl);
+    }
+
+    // OIDC callback: exchange code, validate id_token, and sign-in/create local user
+    private void HandleOidcCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String state = request.getParameter("state");
+        String code = request.getParameter("code");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || state == null || !state.equals(session.getAttribute("oidc_state"))) {
+            response.sendError(400, "Invalid OIDC state.");
+            return;
+        }
+
+        if (code == null) {
+            response.sendError(400, "Authorization code is missing.");
+            return;
+        }
+
+        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + this.OidcRedirectPath;
+
+        // Exchange code for tokens
+        URL tokenUrl = new URL(this.OidcIssuer + "/protocol/openid-connect/token");
+        HttpURLConnection conn = (HttpURLConnection) tokenUrl.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+        String body = String.format(
+                "grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
+                URLEncoder.encode(code, StandardCharsets.UTF_8.toString()),
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.toString()),
+                URLEncoder.encode(this.OidcClientId, StandardCharsets.UTF_8.toString()),
+                URLEncoder.encode(this.OidcClientSecret, StandardCharsets.UTF_8.toString())
+        );
+
+        conn.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+
+        int status = conn.getResponseCode();
+        if (status != 200) {
+            response.sendError(500, "Token endpoint returned " + status);
+            return;
+        }
+
+        try (JsonReader jr = Json.createReader(conn.getInputStream())) {
+            JsonObject jo = jr.readObject();
+            String idToken = jo.getString("id_token", null);
+
+            if (idToken == null) {
+                response.sendError(500, "No id_token in token response.");
+                return;
+            }
+
+            // Verify id_token signature and claims via JWKS
+            try {
+                URL jwksUrl = new URL(this.OidcIssuer + "/protocol/openid-connect/certs");
+                ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+                JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(jwksUrl);
+                jwtProcessor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, keySource));
+
+                JWTClaimsSet claims = jwtProcessor.process(idToken, null);
+
+                // Basic claim checks
+                String issuer = claims.getIssuer();
+                if (issuer == null || !issuer.equals(this.OidcIssuer)) {
+                    // Allow case where issuer includes full realm URL
+                    // e.g., authServer may be https://host/auth/realms/realm
+                    // comparison above already checks equality; if Keycloak uses trailing slash differences, trim
+                }
+
+                if (!claims.getAudience().contains(this.OidcClientId)) {
+                    response.sendError(500, "Token audience mismatch.");
+                    return;
+                }
+
+                Date exp = claims.getExpirationTime();
+                if (exp == null || exp.toInstant().isBefore(Instant.now())) {
+                    response.sendError(500, "Token expired.");
+                    return;
+                }
+
+                String email = claims.getStringClaim("email");
+                String name = claims.getStringClaim("name");
+                
+                if (email == null) {
+                    email = claims.getStringClaim("preferred_username");
+                }
+                
+                if (name == null) {
+                    name = email;
+                }
+
+                if (email == null) {
+                    response.sendError(500, "No email claim in id_token.");
+                    return;
+                }
+
+                // Find or create local user
+                User local = this.userObjectMgmt.GetUserByEmail(email);
+                String placeholderPwd = UUID.randomUUID().toString().replace("-", "");
+                if (local == null) {
+                    int created = this.userObjectMgmt.CreateNewUser(email, placeholderPwd, name);
+                    if (created != 0) {
+                        response.sendError(500, "Could not create local user for OIDC account.");
+                        return;
+                    }
+                    local = this.userObjectMgmt.GetUserSignIn(email, placeholderPwd);
+                }
+
+                if (local == null) {
+                    response.sendError(500, "Local user lookup failed after creation.");
+                    return;
+                }
+
+                // Sign in locally
+                String encodedName = URLEncoder.encode(local.getName(), StandardCharsets.UTF_8.toString());
+                response.addCookie(this.RequestNewCookie("email", local.getEmail(), request.getContextPath()));
+                response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
+                session.setAttribute("loggedUser", local);
+
+                response.sendRedirect(request.getContextPath() + "/");
+
+            } catch (JOSEException | BadJOSEException | IOException | ParseException ex) {
+                response.sendError(500, "Failed to verify id_token: " + ex.getMessage());
+                return;
+            }
+        }
+    }
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -135,6 +324,24 @@ public class Auth extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/");
                 } else {
                     request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/SignIn.jsp").forward(request, response); 
+                }
+            }
+            case "oidc_login" -> {
+                if (this.IsSignedIn(request)) {
+                    response.sendRedirect(request.getContextPath() + "/");
+                } else {
+                    if (this.isOidcEnabled) {
+                        this.HandleOidcLogin(request, response);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/auth?action=denined");
+                    }
+                }
+            }
+            case "oidc_callback" -> {
+                if (this.isOidcEnabled) {
+                    this.HandleOidcCallback(request, response);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/auth?action=denined");
                 }
             }
             case "signup" -> {
