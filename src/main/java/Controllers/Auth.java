@@ -27,14 +27,18 @@ import jakarta.json.JsonReader;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name = "Auth", urlPatterns = {"/auth"})
 public class Auth extends HttpServlet {
@@ -48,7 +52,6 @@ public class Auth extends HttpServlet {
     private final String OidcIssuer;
     private final String OidcClientId;
     private final String OidcClientSecret;
-    private final String OidcRedirectPath;
     
     private boolean isOidcEnabled = false;
     
@@ -60,7 +63,6 @@ public class Auth extends HttpServlet {
         this.OidcIssuer = System.getenv("OIDC_ISSUER");
         this.OidcClientId = System.getenv("OIDC_CLIENT_ID");
         this.OidcClientSecret = System.getenv("OIDC_CLIENT_SECRET");
-        this.OidcRedirectPath = System.getenv("OIDC_REDIRECT_PATH") == null ? "/auth?action=oidc_callback" : System.getenv("OIDC_REDIRECT_PATH");
         
         if (this.OidcIssuer != null && this.OidcClientId != null && this.OidcClientSecret != null) {
             this.isOidcEnabled = true;
@@ -170,7 +172,7 @@ public class Auth extends HttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("oidc_state", state);
 
-        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + this.OidcRedirectPath;
+        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + "/auth?action=oidc_callback";
 
         String authUrl = String.format(
                 "%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=openid%%20profile%%20email&state=%s",
@@ -184,7 +186,7 @@ public class Auth extends HttpServlet {
     }
 
     // OIDC callback: exchange code, validate id_token, and sign-in/create local user
-    private void HandleOidcCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void HandleOidcCallback(HttpServletRequest request, HttpServletResponse response) throws IOException, URISyntaxException {
         String state = request.getParameter("state");
         String code = request.getParameter("code");
 
@@ -199,7 +201,7 @@ public class Auth extends HttpServlet {
             return;
         }
 
-        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + this.OidcRedirectPath;
+        String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + "/auth?action=oidc_callback";
 
         // Exchange code for tokens
         URL tokenUrl = new URL(this.OidcIssuer + "/protocol/openid-connect/token");
@@ -235,9 +237,9 @@ public class Auth extends HttpServlet {
 
             // Verify id_token signature and claims via JWKS
             try {
-                URL jwksUrl = new URL(this.OidcIssuer + "/protocol/openid-connect/certs");
+                URL jwksUrl = new URI(this.OidcIssuer + "/protocol/openid-connect/certs").toURL();
                 ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-                JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(jwksUrl);
+                JWKSource<SecurityContext> keySource = JWKSourceBuilder.create(jwksUrl).build();
                 jwtProcessor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, keySource));
 
                 JWTClaimsSet claims = jwtProcessor.process(idToken, null);
@@ -245,9 +247,8 @@ public class Auth extends HttpServlet {
                 // Basic claim checks
                 String issuer = claims.getIssuer();
                 if (issuer == null || !issuer.equals(this.OidcIssuer)) {
-                    // Allow case where issuer includes full realm URL
-                    // e.g., authServer may be https://host/auth/realms/realm
-                    // comparison above already checks equality; if Keycloak uses trailing slash differences, trim
+                    response.sendError(500, "Issuer mismatch");
+                    return;
                 }
 
                 if (!claims.getAudience().contains(this.OidcClientId)) {
@@ -265,18 +266,24 @@ public class Auth extends HttpServlet {
                 String name = claims.getStringClaim("name");
                 
                 if (email == null) {
-                    email = claims.getStringClaim("preferred_username");
+                    response.sendError(500, "Email is not specified.");
+                    return;
+                }
+                
+                if (!email.matches(this.emailRegex)) {
+                    response.sendError(500, "email is not in correct format.");
+                    return;
                 }
                 
                 if (name == null) {
-                    name = email;
+                    name = claims.getStringClaim("preferred_username");
                 }
-
-                if (email == null) {
-                    response.sendError(500, "No email claim in id_token.");
+                
+                if (!name.matches(name)) {
+                    response.sendError(500, "name is not in correct format.");
                     return;
                 }
-
+                
                 // Find or create local user
                 User local = this.userObjectMgmt.GetUserByEmail(email);
                 String placeholderPwd = UUID.randomUUID().toString().replace("-", "");
@@ -301,10 +308,8 @@ public class Auth extends HttpServlet {
                 session.setAttribute("loggedUser", local);
 
                 response.sendRedirect(request.getContextPath() + "/");
-
             } catch (JOSEException | BadJOSEException | IOException | ParseException ex) {
-                response.sendError(500, "Failed to verify id_token: " + ex.getMessage());
-                return;
+                response.sendError(500, "Failed with reason: " + ex.getMessage());
             }
         }
     }
@@ -326,7 +331,7 @@ public class Auth extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/SignIn.jsp").forward(request, response); 
                 }
             }
-            case "oidc_login" -> {
+            case "oidc_signin" -> {
                 if (this.IsSignedIn(request)) {
                     response.sendRedirect(request.getContextPath() + "/");
                 } else {
@@ -339,7 +344,11 @@ public class Auth extends HttpServlet {
             }
             case "oidc_callback" -> {
                 if (this.isOidcEnabled) {
-                    this.HandleOidcCallback(request, response);
+                    try {
+                        this.HandleOidcCallback(request, response);
+                    } catch (URISyntaxException ex) {
+                        Logger.getLogger(Auth.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else {
                     response.sendRedirect(request.getContextPath() + "/auth?action=denined");
                 }
