@@ -48,27 +48,27 @@ public class Auth extends HttpServlet {
     private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,10}$";
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
-    
+
     private final String OidcIssuer;
     private final String OidcClientId;
     private final String OidcClientSecret;
-    
+
     private boolean isOidcEnabled = false;
-    
+
     private final UserDAO userObjectMgmt;
-    
+
     public Auth() {
         this.userObjectMgmt = new UserDAO();
-        
+
         this.OidcIssuer = System.getenv("OIDC_ISSUER");
         this.OidcClientId = System.getenv("OIDC_CLIENT_ID");
         this.OidcClientSecret = System.getenv("OIDC_CLIENT_SECRET");
-        
+
         if (this.OidcIssuer != null && this.OidcClientId != null && this.OidcClientSecret != null) {
             this.isOidcEnabled = true;
         }
     }
-    
+
     /*
     API Mapping for Auth
     - POST
@@ -79,25 +79,24 @@ public class Auth extends HttpServlet {
         + action=signin - Dang Nhap
         + action=signup - Dang Ky
         + action=logout - Dang xuat
-    */
-    
+     */
     private boolean IsSignedIn(HttpServletRequest request) {
         User u = (User) request.getSession().getAttribute("loggedUser");
         return u != null;
     }
-    
+
     private Cookie RequestNewCookie(String cookieName, String cookieValue, String contextPath) {
         Cookie c = new Cookie(cookieName, cookieValue);
-        
+
         c.setMaxAge(60 * 60);
         c.setPath(contextPath);
-        
+
         c.setHttpOnly(true);
         c.setSecure(true);
 
         return c;
     }
-    
+
     private void ResetCredentialCookie(HttpServletResponse response) {
         for (String cn : cookieHeadName) {
             Cookie c = new Cookie(cn, "");
@@ -105,54 +104,54 @@ public class Auth extends HttpServlet {
             response.addCookie(c);
         }
     }
-    
+
     private void HandleSignIn(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
         String pwdHash = request.getParameter("pwdHash");
-        
+
         if (email == null || pwdHash == null) {
             response.sendError(500, "Required parameter is null. Please check the input.");
             return;
         }
-        
+
         if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex)) {
             response.sendError(500, "email or pwdHash did not in valid format.");
             return;
         }
-        
+
         User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
         if (user != null) {
             String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
             response.setStatus(200);
-            
+
             response.addCookie(this.RequestNewCookie("email", user.getEmail(), request.getContextPath()));
             response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
-            
+
             HttpSession session = request.getSession();
             session.setAttribute("loggedUser", user);
-            
+
             response.sendRedirect(request.getContextPath() + "/");
         } else {
             this.ResetCredentialCookie(response);
             response.sendRedirect(request.getContextPath() + "/auth?action=denied");
         }
     }
-    
+
     private void HandleSignUp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
         String pwdHash = request.getParameter("pwdHash");
         String name = request.getParameter("name");
-        
+
         if (email == null || pwdHash == null || name == null) {
             response.sendError(500, "Required parameter is null. Please check the input.");
             return;
         }
-        
+
         if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex) || !name.matches(nameRegex)) {
             response.sendError(500, "Either email, pwdHash, or name is not in correct format. Please check the input.");
             return;
         }
-        
+
         int sqlExec = this.userObjectMgmt.CreateNewUser(email, pwdHash, name);
         if (sqlExec != 0) {
             response.sendError(500, "The user could not be created.");
@@ -264,26 +263,26 @@ public class Auth extends HttpServlet {
 
                 String email = claims.getStringClaim("email");
                 String name = claims.getStringClaim("name");
-                
+
                 if (email == null) {
                     response.sendError(500, "Email is not specified.");
                     return;
                 }
-                
+
                 if (!email.matches(this.emailRegex)) {
                     response.sendError(500, "email is not in correct format.");
                     return;
                 }
-                
+
                 if (name == null) {
                     name = claims.getStringClaim("preferred_username");
                 }
-                
+
                 if (!name.matches(name)) {
                     response.sendError(500, "name is not in correct format.");
                     return;
                 }
-                
+
                 // Find or create local user
                 User local = this.userObjectMgmt.GetUserByEmail(email);
                 String placeholderPwd = UUID.randomUUID().toString().replace("-", "");
@@ -313,7 +312,7 @@ public class Auth extends HttpServlet {
             }
         }
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         switch (request.getParameter("action")) {
@@ -328,7 +327,7 @@ public class Auth extends HttpServlet {
                 if (this.IsSignedIn(request)) {
                     response.sendRedirect(request.getContextPath() + "/");
                 } else {
-                    request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/SignIn.jsp").forward(request, response); 
+                    request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/SignIn.jsp").forward(request, response);
                 }
             }
             case "oidc_signin" -> {
@@ -381,12 +380,14 @@ public class Auth extends HttpServlet {
             }
         }
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         switch (request.getParameter("action")) {
-            case "signin" -> this.HandleSignIn(request, response);
-            case "signup" -> this.HandleSignUp(request, response);
+            case "signin" ->
+                this.HandleSignIn(request, response);
+            case "signup" ->
+                this.HandleSignUp(request, response);
             default -> {
                 response.setStatus(404);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/Denied.jsp").forward(request, response);
