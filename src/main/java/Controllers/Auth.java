@@ -45,7 +45,7 @@ public class Auth extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final String[] cookieHeadName = {"email", "name"};
-    private final String emailRegex = "^[A-Za-z0-9\\.]{1,64}@[A-Za-z0-9]{1,64}\\.[A-Za-z]{1,10}$";
+    private final String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
     private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
 
