@@ -39,8 +39,8 @@ public class PostList extends HttpServlet {
         if (!this.IsAuthenticated(session)) {
             return false;
         }
-        
-        return (u.getId() == 1);
+
+        return (u.getGroupId() == 1);
     }
     
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
