@@ -23,7 +23,9 @@
                             <input name="pwdHash" type="password" class="form-control" id="password" autocomplete="off"> 
                             <label for="floatingPassword">Mật khẩu</label>
                         </div>
-                        <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button> 
+                        <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button>
+                        <br><br>
+                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Đăng nhập với Keycloak</a>
                     </form>
                 </div>
             </div>

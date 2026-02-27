@@ -102,6 +102,12 @@ GO
 EXEC NewUser N'administrator@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'Administrator', 1;
 GO
 
+EXEC NewUser N'administrator@anhvlt.io.vn', 'b094fb4206914fb38916192c3b752ed8', 'Administrator', 1;
+GO
+
+EXEC NewUser N'anhvlt.2006@outlook.com', 'ff028e1c6f8d43e1-8a6e0c5426d41683', 'Vo Luu Tuong Anh', 1;
+GO
+
 /** TABLE: Category **/
 SET ANSI_NULLS ON
 GO
