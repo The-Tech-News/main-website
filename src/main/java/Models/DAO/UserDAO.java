@@ -41,7 +41,7 @@ public class UserDAO extends DBContext {
     }
     
     // Get user by email (no password check)
-    public User GetUserByEmail(String email) {
+    public User GetUserSignIn(String email) {
         User user = null;
 
         String sqlCommand = """
