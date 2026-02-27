@@ -122,14 +122,12 @@ public class Auth extends HttpServlet {
         User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
         if (user != null) {
             String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
-            response.setStatus(200);
-
-            response.addCookie(this.RequestNewCookie("email", user.getEmail(), request.getContextPath()));
-            response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
-
+            
             HttpSession session = request.getSession();
             session.setAttribute("loggedUser", user);
-
+            
+            response.addCookie(this.RequestNewCookie("email", user.getEmail(), request.getContextPath()));
+            response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
             response.sendRedirect(request.getContextPath() + "/");
         } else {
             this.ResetCredentialCookie(response);
@@ -184,12 +182,13 @@ public class Auth extends HttpServlet {
         response.sendRedirect(authUrl);
     }
 
-    // OIDC callback: exchange code, validate id_token, and sign-in/create local user
+    // OIDC callback: exchange code, validate id_token, and sign-in/create u user
     private void HandleOidcCallback(HttpServletRequest request, HttpServletResponse response) throws IOException, URISyntaxException {
         String state = request.getParameter("state");
         String code = request.getParameter("code");
 
-        HttpSession session = request.getSession(false);
+        HttpSession session = request.getSession();
+        
         if (session == null || state == null || !state.equals(session.getAttribute("oidc_state"))) {
             response.sendError(400, "Invalid OIDC state.");
             return;
@@ -203,7 +202,7 @@ public class Auth extends HttpServlet {
         String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + "/auth?action=oidc_callback";
 
         // Exchange code for tokens
-        URL tokenUrl = new URL(this.OidcIssuer + "/protocol/openid-connect/token");
+        URL tokenUrl = new URI(this.OidcIssuer + "/protocol/openid-connect/token").toURL();
         HttpURLConnection conn = (HttpURLConnection) tokenUrl.openConnection();
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
@@ -283,28 +282,31 @@ public class Auth extends HttpServlet {
                     return;
                 }
 
-                // Find or create local user
-                User local = this.userObjectMgmt.GetUserByEmail(email);
+                // Find or create u user
+                User u = this.userObjectMgmt.GetUserSignIn(email);
                 String placeholderPwd = UUID.randomUUID().toString().replace("-", "");
-                if (local == null) {
+                
+                if (u == null) {
                     int created = this.userObjectMgmt.CreateNewUser(email, placeholderPwd, name);
+                    
                     if (created != 0) {
                         response.sendError(500, "Could not create local user for OIDC account.");
                         return;
                     }
-                    local = this.userObjectMgmt.GetUserSignIn(email, placeholderPwd);
+                    
+                    u = this.userObjectMgmt.GetUserSignIn(email, placeholderPwd);
                 }
 
-                if (local == null) {
+                if (u == null) {
                     response.sendError(500, "Local user lookup failed after creation.");
                     return;
                 }
 
                 // Sign in locally
-                String encodedName = URLEncoder.encode(local.getName(), StandardCharsets.UTF_8.toString());
-                response.addCookie(this.RequestNewCookie("email", local.getEmail(), request.getContextPath()));
+                String encodedName = URLEncoder.encode(u.getName(), StandardCharsets.UTF_8.toString());
+                response.addCookie(this.RequestNewCookie("email", u.getEmail(), request.getContextPath()));
                 response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
-                session.setAttribute("loggedUser", local);
+                session.setAttribute("loggedUser", u);
 
                 response.sendRedirect(request.getContextPath() + "/");
             } catch (JOSEException | BadJOSEException | IOException | ParseException ex) {
