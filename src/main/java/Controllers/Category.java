@@ -75,7 +75,7 @@ public class Category extends HttpServlet {
         User u = (User) request.getSession().getAttribute("loggedUser");
 
         if (u != null) {
-            if (u.getId() == 1) {
+            if (u.getGroupId() == 1) {
                 hasPermission = true;
             }
         }
@@ -87,6 +87,7 @@ public class Category extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!this.HasPermission(request)) {
             request.getRequestDispatcher("/WEB-INF/JSPViews/CategoryView/NoPermission.jsp").forward(request, response);
+            return;
         }
 
         switch (request.getParameter("action")) {
