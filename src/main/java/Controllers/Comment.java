@@ -25,21 +25,15 @@ public class Comment extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action == null) {
-            request.getRequestDispatcher("home.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/");
             return;
         }
 
         switch (action) {
-            case "get":
-                getComments(request, response);
-                break;
-            case "create":
-            case "delete":
-                // create and delete must be POST
+            case "get" -> getComments(request, response);
+            case "create", "delete" -> // create and delete must be POST
                 response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                break;
-            default:
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -53,14 +47,9 @@ public class Comment extends HttpServlet {
         }
 
         switch (action) {
-            case "create":
-                createComment(request, response);
-                break;
-            case "delete":
-                deleteComment(request, response);
-                break;
-            default:
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            case "create" -> createComment(request, response);
+            case "delete" -> deleteComment(request, response);
+            default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -78,17 +67,18 @@ public class Comment extends HttpServlet {
         List<Models.Objects.Comment> comments = commentDAO.getByPostId(postId);
 
         request.setAttribute("comments", comments);
-        request.getRequestDispatcher("post-detail.jsp").forward(request, response);
+        request.setAttribute("postId", postId);
+        request.getRequestDispatcher("/WEB-INF/JSPViews/CommentView/Create.jsp").forward(request, response);
     }
 
     private void createComment(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         HttpSession session = request.getSession(false);
-        User user = session == null ? null : (User) session.getAttribute("user");
+        User user = session == null ? null : (User) session.getAttribute("loggedUser");
 
         if (user == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect(request.getContextPath() + "/auth?action=signin");
             return;
         }
 
@@ -112,17 +102,18 @@ public class Comment extends HttpServlet {
 
         commentDAO.create(c);
 
-        response.sendRedirect("post?action=detail&id=" + postId);
+        String referer = request.getHeader("Referer");
+        response.sendRedirect(referer != null ? referer : request.getContextPath() + "/");
     }
 
     private void deleteComment(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         HttpSession session = request.getSession(false);
-        User user = session == null ? null : (User) session.getAttribute("user");
+        User user = session == null ? null : (User) session.getAttribute("loggedUser");
 
         if (user == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect(request.getContextPath() + "/auth?action=signin");
             return;
         }
 
