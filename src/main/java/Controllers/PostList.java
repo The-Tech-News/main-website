@@ -293,7 +293,13 @@ if (idStr == null || !idStr.matches(numberRegex)) {
     return;
 }
 
-int id = Integer.parseInt(idStr);
+int id;
+try {
+    id = Integer.parseInt(idStr);
+} catch (NumberFormatException e) {
+    response.sendError(400, "Invalid ID");
+    return;
+}
     if (!HasAccessToPost(session, id)) {
         request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
                .forward(request, response);
@@ -308,7 +314,13 @@ if (idStr == null || !idStr.matches(numberRegex)) {
     return;
 }
 
-int id = Integer.parseInt(idStr);
+int id;
+try {
+    id = Integer.parseInt(idStr);
+} catch (NumberFormatException e) {
+    response.sendError(400, "Invalid ID");
+    return;
+}
     if (!HasAccessToPost(session, id)) {
         request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
                .forward(request, response);
