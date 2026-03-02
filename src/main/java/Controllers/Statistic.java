@@ -50,7 +50,13 @@ public class Statistic extends HttpServlet {
                 response.sendError(400, "Invalid top");
                 return;
             }
-            int top = Integer.parseInt(topStr);
+            int top;
+            try {
+                top = Integer.parseInt(topStr);
+            } catch (NumberFormatException e) {
+                response.sendError(400, "Invalid top");
+                return;
+            }
             if (top <= 0) {
                 response.sendError(400, "top must be > 0");
                 return;
