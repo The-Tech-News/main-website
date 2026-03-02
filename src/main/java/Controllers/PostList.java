@@ -43,50 +43,54 @@ public class PostList extends HttpServlet {
         return (u.getGroupId() == 1);
     }
     
-    private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String title = request.getParameter("title");
-        String content = request.getParameter("content");
-        int userId = -1;
-        int categoryId = -1;
-        
-        try {
-            String userIdStr = request.getParameter("userId");
-            String categoryIdStr = request.getParameter("categoryId");
-            
-            if (userIdStr == null || categoryIdStr == null) {
-                response.sendError(500, "Either User ID or Category ID is not specified");
-                return;
-            }
-            
-            if (!userIdStr.matches(this.numberRegex) || !categoryIdStr.matches(this.numberRegex)) {
-                response.sendError(500, "Either User ID or Category ID must be a number");
-                return;
-            }
-            
-            userId = Integer.parseInt(userIdStr);
-            categoryId = Integer.parseInt(categoryIdStr);
-        } catch (NumberFormatException numex) {
-            response.sendError(500, "Unable to parse Id as integer");
-            return;
-        }
-        
-        if (title == null || content == null) {
-            response.sendError(500, "Either title or content should be not null");
-            return;
-        }
-        
-        if (userId == -1 || categoryId == -1) {
-            response.sendError(500, "Either title or content should be not null");
-            return;
-        }
-        
-        int executeQue = this.postObjectMgmt.InsertPost(title, content, userId, categoryId);
-        if (executeQue != 0) {
-            response.sendError(500, "The category could not be editied");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-        }
+    private void CreatePost(HttpServletRequest request,
+                        HttpServletResponse response)
+        throws ServletException, IOException {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null || !IsAuthenticated(session)) {
+        response.sendError(403, "Unauthorized");
+        return;
     }
+
+    User u = (User) session.getAttribute("loggedUser");
+
+    String title = request.getParameter("title");
+    String content = request.getParameter("content");
+    String categoryIdStr = request.getParameter("categoryId");
+
+
+    if (title == null || content == null ||
+        title.trim().isEmpty() || content.trim().isEmpty()) {
+
+        response.sendError(400, "Title and content must not be empty");
+        return;
+    }
+
+    if (categoryIdStr == null || !categoryIdStr.matches(numberRegex)) {
+        response.sendError(400, "Invalid Category ID");
+        return;
+    }
+
+    int categoryId = Integer.parseInt(categoryIdStr);
+
+    int userId = u.getId();
+
+    int executeQue = this.postObjectMgmt.InsertPost(
+            title.trim(),
+            content.trim(),
+            userId,
+            categoryId
+    );
+
+    if (executeQue != 0) {
+        response.sendError(500, "Unable to create post");
+    } else {
+        response.sendRedirect(request.getContextPath()
+                + "/admin/posts?action=list");
+    }
+}
     
     private void EditPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String title = request.getParameter("title");
