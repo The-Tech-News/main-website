@@ -1,7 +1,6 @@
 package Controllers;
 
 import Models.DAO.PostDAO;
-import Models.Objects.Post;
 import Models.Objects.User;
 
 import jakarta.servlet.ServletException;
@@ -14,8 +13,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@WebServlet(name = "PostServlet", urlPatterns = {"/post"})
-public class PostServlet extends HttpServlet {
+@WebServlet(name = "Post", urlPatterns = {"/post"})
+public class Post extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,9 +30,9 @@ public class PostServlet extends HttpServlet {
 
         String idStr = request.getParameter("id");
 
-        // HOME: /post  (or /post with no id)
+        // HOME: /post
         if (idStr == null || idStr.isBlank()) {
-            ArrayList<Post> posts = postDAO.GetHomePosts(loggedUser);
+            ArrayList<Models.Objects.Post> posts = postDAO.GetHomePosts(loggedUser);
             request.setAttribute("posts", posts);
             request.getRequestDispatcher("/WEB-INF/JSPViews/PostView/Home.jsp").forward(request, response);
             return;
@@ -45,17 +44,10 @@ public class PostServlet extends HttpServlet {
             return;
         }
 
-        int id;
-        try {
-            id = Integer.parseInt(idStr);
-        } catch (NumberFormatException e) {
-            response.sendError(400, "Invalid id");
-            return;
-        }
+        int id = Integer.parseInt(idStr);
 
-        Post post = postDAO.GetPostForView(id, loggedUser);
+        Models.Objects.Post post = postDAO.GetPostForView(id, loggedUser);
         if (post == null) {
-            // use 404 to avoid revealing hidden posts
             response.sendError(404);
             return;
         }
