@@ -244,7 +244,6 @@ public class PostList extends HttpServlet {
                     request.setAttribute("categories", categories);
                     request.setAttribute("post", post);
                     request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
-
                 } catch (NumberFormatException numEx) {
                     response.sendError(500, numEx.getLocalizedMessage());
                 }
