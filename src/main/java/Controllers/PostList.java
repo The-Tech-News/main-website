@@ -73,7 +73,13 @@ public class PostList extends HttpServlet {
         return;
     }
 
-    int categoryId = Integer.parseInt(categoryIdStr);
+    int categoryId;
+    try {
+        categoryId = Integer.parseInt(categoryIdStr);
+    } catch (NumberFormatException e) {
+        response.sendError(400, "Invalid Category ID");
+        return;
+    }
 
     int userId = u.getId();
 
