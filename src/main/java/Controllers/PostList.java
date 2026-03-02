@@ -300,19 +300,16 @@ public class PostList extends HttpServlet {
                     return;
                 }
 
-                int id;
                 try {
-                    id = Integer.parseInt(idStr);
+                    int id = Integer.parseInt(idStr);
+                    if (!HasAccessToPost(session, id)) {
+                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
+                        return;
+                    }
+                    this.EditPost(request, response);
                 } catch (NumberFormatException e) {
                     response.sendError(400, "Invalid ID");
-                    return;
                 }
-                if (!HasAccessToPost(session, id)) {
-                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                            .forward(request, response);
-                    return;
-                }
-                this.EditPost(request, response);
             }
             case "hide" -> {
                 String idStr = request.getParameter("id");
