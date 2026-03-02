@@ -44,7 +44,13 @@ public class Post extends HttpServlet {
             return;
         }
 
-        int id = Integer.parseInt(idStr);
+        int id;
+        try {
+            id = Integer.parseInt(idStr);
+        } catch (NumberFormatException ex) {
+            response.sendError(400, "Invalid id");
+            return;
+        }
 
         Models.Objects.Post post = postDAO.GetPostForView(id, loggedUser);
         if (post == null) {
