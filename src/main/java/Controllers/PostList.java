@@ -43,6 +43,41 @@ public class PostList extends HttpServlet {
         return (u.getGroupId() == 1);
     }
 
+    private boolean HasAccessToPost(HttpSession session, int postId) {
+        if (!IsAuthenticated(session)) {
+            return false;
+        }
+
+        User u = (User) session.getAttribute("loggedUser");
+
+        if (IsAdmin(session)) {
+            return true;
+        }
+
+        Post post = postObjectMgmt.GetPostById(postId);
+        if (post == null) {
+            return false;
+        }
+
+        return post.getUserId() == u.getId();
+    }
+
+    private boolean IsValidReferer(HttpServletRequest request) {
+        String referer = request.getHeader("referer");
+        
+        if (referer == null) {
+            return false;
+        }
+
+        String expectedURL = request.getScheme() + "://"
+                + request.getServerName() + ":"
+                + request.getServerPort()
+                + request.getContextPath()
+                + "/admin/posts";
+
+        return referer.startsWith(expectedURL);
+    }
+
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
@@ -58,9 +93,7 @@ public class PostList extends HttpServlet {
         String content = request.getParameter("content");
         String categoryIdStr = request.getParameter("categoryId");
 
-        if (title == null || content == null
-                || title.trim().isEmpty() || content.trim().isEmpty()) {
-
+        if (title == null || content == null || title.trim().isEmpty() || content.trim().isEmpty()) {
             response.sendError(400, "Title and content must not be empty");
             return;
         }
@@ -175,41 +208,6 @@ public class PostList extends HttpServlet {
         }
     }
 
-    private boolean HasAccessToPost(HttpSession session, int postId) {
-        if (!IsAuthenticated(session)) {
-            return false;
-        }
-
-        User u = (User) session.getAttribute("loggedUser");
-
-        if (IsAdmin(session)) {
-            return true;
-        }
-
-        Post post = postObjectMgmt.GetPostById(postId);
-        if (post == null) {
-            return false;
-        }
-
-        return post.getUserId() == u.getId();
-    }
-
-    private boolean IsValidReferer(HttpServletRequest request) {
-        String referer = request.getHeader("referer");
-
-        if (referer == null) {
-            return false;
-        }
-
-        String expectedURL = request.getScheme() + "://"
-                + request.getServerName() + ":"
-                + request.getServerPort()
-                + request.getContextPath()
-                + "/admin/posts";
-
-        return referer.startsWith(expectedURL);
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
@@ -241,10 +239,10 @@ public class PostList extends HttpServlet {
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     if (!HasAccessToPost(session, id)) {
-                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                                .forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
                         return;
                     }
+
                     Post post = this.postObjectMgmt.GetPostById(id);
                     ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
                     request.setAttribute("categories", categories);
@@ -259,8 +257,7 @@ public class PostList extends HttpServlet {
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     if (!HasAccessToPost(session, id)) {
-                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                                .forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
                         return;
                     }
                     request.setAttribute("id", id);
@@ -281,10 +278,10 @@ public class PostList extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if (session == null || !IsAuthenticated(session)) {
-            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             return;
         }
+
         if (!IsValidReferer(request)) {
             response.sendError(403, "Invalid request source");
             return;
