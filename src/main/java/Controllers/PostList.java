@@ -64,12 +64,13 @@ public class PostList extends HttpServlet {
 
     private boolean IsValidReferer(HttpServletRequest request) {
         String referer = request.getHeader("referer");
-        
+
         if (referer == null) {
             return false;
         }
 
-        String expectedURL = request.getScheme() + "://"
+        String expectedURL = 
+                request.getScheme() + "://"
                 + request.getServerName() + ":"
                 + request.getServerPort()
                 + request.getContextPath()
@@ -103,28 +104,23 @@ public class PostList extends HttpServlet {
             return;
         }
 
-        int categoryId;
-        try {
-            categoryId = Integer.parseInt(categoryIdStr);
-        } catch (NumberFormatException e) {
-            response.sendError(400, "Invalid Category ID");
-            return;
-        }
-
         int userId = u.getId();
 
-        int executeQue = this.postObjectMgmt.InsertPost(
-                title.trim(),
-                content.trim(),
-                userId,
-                categoryId
-        );
-
-        if (executeQue != 0) {
-            response.sendError(500, "Unable to create post");
-        } else {
-            response.sendRedirect(request.getContextPath()
-                    + "/admin/posts?action=list");
+        try {
+            int categoryId = Integer.parseInt(categoryIdStr);
+            int executeQue = this.postObjectMgmt.InsertPost(
+                    title.trim(),
+                    content.trim(),
+                    userId,
+                    categoryId
+            );
+            if (executeQue != 0) {
+                response.sendError(500, "Unable to create post");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+            }
+        } catch (NumberFormatException e) {
+            response.sendError(400, "Invalid Category ID");
         }
     }
 
@@ -315,19 +311,16 @@ public class PostList extends HttpServlet {
                     return;
                 }
 
-                int id;
                 try {
-                    id = Integer.parseInt(idStr);
+                    int id = Integer.parseInt(idStr);
+                    if (!HasAccessToPost(session, id)) {
+                        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
+                        return;
+                    }
+                    this.HidePost(request, response);
                 } catch (NumberFormatException e) {
                     response.sendError(400, "Invalid ID");
-                    return;
                 }
-                if (!HasAccessToPost(session, id)) {
-                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                            .forward(request, response);
-                    return;
-                }
-                this.HidePost(request, response);
             }
             default -> {
                 response.setStatus(404);
