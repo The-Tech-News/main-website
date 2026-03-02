@@ -167,17 +167,44 @@ public class PostList extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
         }
     }
+    private boolean HasAccessToPost(HttpSession session, int postId) {
+    if (!IsAuthenticated(session)) return false;
+
+    User u = (User) session.getAttribute("loggedUser");
+
+    if (IsAdmin(session)) return true;
+
+    Post post = postObjectMgmt.GetPostById(postId);
+    if (post == null) return false;
+
+    return post.getUserId() == u.getId();
+}
+  private boolean IsValidReferer(HttpServletRequest request) {
+    String referer = request.getHeader("referer");
+
+    if (referer == null) return false;
+
+    String expectedURL = request.getScheme() + "://" +
+                         request.getServerName() + ":" +
+                         request.getServerPort() +
+                         request.getContextPath() +
+                         "/admin/posts";
+
+    return referer.startsWith(expectedURL);
+}
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        User u = (User) session.getAttribute("loggedUser");
-        
-        if (!this.IsAuthenticated(session)) {
-            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
-            return;
-        }
-        
+       HttpSession session = request.getSession(false);
+
+if (session == null || !IsAuthenticated(session)) {
+    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+           .forward(request, response);
+    return;
+}
+
+User u = (User) session.getAttribute("loggedUser");
+
         switch (request.getParameter("action")) {
             case null -> {
                 response.sendRedirect("/admin/posts?action=list");
@@ -193,27 +220,39 @@ public class PostList extends HttpServlet {
                 request.setAttribute("userId", u.getId());
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp").forward(request, response);
             }
-            case "edit" -> {
-                try {
-                    int id = Integer.parseInt(request.getParameter("id"));
-                    Post post = this.postObjectMgmt.GetPostById(id);
-                    ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
-                    request.setAttribute("categories", categories);
-                    request.setAttribute("post", post);
-                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
-                } catch (NumberFormatException numEx) {
-                    response.sendError(500, numEx.getLocalizedMessage());
-                }
-            }
-            case "hide" -> {
-                try {
-                    int id = Integer.parseInt(request.getParameter("id"));
-                    request.setAttribute("id", id);
-                    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Hide.jsp").forward(request, response);
-                } catch (NumberFormatException numEx) {
-                    response.sendError(500, numEx.getLocalizedMessage());
-                }
-            }
+         case "edit" -> {
+    try {
+        int id = Integer.parseInt(request.getParameter("id"));
+        if (!HasAccessToPost(session, id)) {
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+                   .forward(request, response);
+            return;
+        }
+        Post post = this.postObjectMgmt.GetPostById(id);
+        ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
+        request.setAttribute("categories", categories);
+        request.setAttribute("post", post);
+        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
+
+    } catch (NumberFormatException numEx) {
+        response.sendError(500, numEx.getLocalizedMessage());
+    }
+}
+           case "hide" -> {
+    try {
+        int id = Integer.parseInt(request.getParameter("id"));
+        if (!HasAccessToPost(session, id)) {
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+                   .forward(request, response);
+            return;
+        }
+        request.setAttribute("id", id);
+        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Hide.jsp").forward(request, response);
+
+    } catch (NumberFormatException numEx) {
+        response.sendError(500, numEx.getLocalizedMessage());
+    }
+}
             default -> {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             }
@@ -222,23 +261,51 @@ public class PostList extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        
-        if (!this.IsAuthenticated(session)) {
-            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
-            return;
-        }
-        
-        switch (request.getParameter("action")) {
-            case "create" -> {
+HttpSession session = request.getSession(false);
+
+if (session == null || !IsAuthenticated(session)) {
+    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+           .forward(request, response);
+    return;
+}
+         if (!IsValidReferer(request)) {
+        response.sendError(403, "Invalid request source");
+        return;
+    }
+       switch (request.getParameter("action")) {
+        case "create" -> {
                 this.CreatePost(request, response);
             }
-            case "edit" -> {
-                this.EditPost(request, response);
-            }
+        case "edit" -> {
+   String idStr = request.getParameter("id");
+if (idStr == null || !idStr.matches(numberRegex)) {
+    response.sendError(400, "Invalid ID");
+    return;
+}
+
+int id = Integer.parseInt(idStr);
+    if (!HasAccessToPost(session, id)) {
+        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+               .forward(request, response);
+        return;
+    }
+    this.EditPost(request, response);
+}
             case "hide" -> {
-                this.HidePost(request, response);
-            }
+  String idStr = request.getParameter("id");
+if (idStr == null || !idStr.matches(numberRegex)) {
+    response.sendError(400, "Invalid ID");
+    return;
+}
+
+int id = Integer.parseInt(idStr);
+    if (!HasAccessToPost(session, id)) {
+        request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
+               .forward(request, response);
+        return;
+    }
+    this.HidePost(request, response);
+}
             default -> {
                 response.setStatus(404);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
