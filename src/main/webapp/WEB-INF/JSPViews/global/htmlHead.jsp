@@ -6,23 +6,22 @@
         
         <meta property="og:title" content="The Tech News Project">
         <meta property="og:description" content="The Tech News Project. Visit https://github.com/The-Tech-News for project.">
-        <meta property="og:url" content="https://technews.anhvlt.io.vn">
         <meta property="og:site_name" content="The Tech News">
         <meta property="og:type" content="website">
         
         <meta name="keyword" content="tech, news, tech news, sample, project, prj301, fpt, bootstrap, api, java-ee, java, github, gitlab, docker, online">
         
-         <script type="application/ld+json">
-            {
-              "@context": "https://schema.org",
-              "@type": "Website",
-              "name": "The Tech News Project",
-              "provider": {
-                "@type": "Organization",
-                "name": "The Tech News"
-              }
-            }
-        </script>
-        
-        <link rel="canonical" href="https://technews.anhvlt.io.vn/">
         <link rel="stylesheet" href="<%= request.getContextPath()%>/lib/bootstrap/dist/css/bootstrap.min.css" >
+
+        <script type="application/ld+json">
+           {
+             "@context": "https://schema.org",
+             "@type": "Website",
+             "name": "The Tech News Project",
+             "provider": {
+               "@type": "Organization",
+               "name": "The Tech News"
+             }
+           }
+       </script>
+        
