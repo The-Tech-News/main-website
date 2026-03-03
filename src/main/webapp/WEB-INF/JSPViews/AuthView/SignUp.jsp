@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>The Tech News - Đăng Ký</title>
 <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>

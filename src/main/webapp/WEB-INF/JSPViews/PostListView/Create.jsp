@@ -3,7 +3,7 @@
 <%@page import="Models.Objects.User"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Admin Post - Create</title>
 <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
