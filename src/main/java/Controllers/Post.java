@@ -22,8 +22,7 @@ public class Post extends HttpServlet {
     private final String numberRegex = "^[0-9]+$";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
         User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");

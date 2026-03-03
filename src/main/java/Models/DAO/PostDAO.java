@@ -36,9 +36,10 @@ public class PostDAO extends DBContext {
                 WHERE [isHidden] = 0
                 ORDER BY [id] DESC;
             """;
-            try (PreparedStatement ps = super.getConnection().prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(MapPost(rs));
+            try (PreparedStatement ps = super.getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(MapPost(rs));
+                }
             } catch (SQLException ex) {
                 Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -51,9 +52,10 @@ public class PostDAO extends DBContext {
                 FROM [technewsdb].[dbo].[Post]
                 ORDER BY [id] DESC;
             """;
-            try (PreparedStatement ps = super.getConnection().prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(MapPost(rs));
+            try (PreparedStatement ps = super.getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(MapPost(rs));
+                }
             } catch (SQLException ex) {
                 Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -69,7 +71,9 @@ public class PostDAO extends DBContext {
         try (PreparedStatement ps = super.getConnection().prepareStatement(sql)) {
             ps.setInt(1, viewer.getId());
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(MapPost(rs));
+                while (rs.next()) {
+                    list.add(MapPost(rs));
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
@@ -91,17 +95,25 @@ public class PostDAO extends DBContext {
         try (PreparedStatement ps = super.getConnection().prepareStatement(sql)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) post = MapPost(rs);
+                if (rs.next()) {
+                    post = MapPost(rs);
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (post == null) return null;
+        if (post == null) {
+            return null;
+        }
 
         // visibility rule from #12
-        if (!post.isHidden()) return post;
-        if (viewer == null) return null;
+        if (!post.isHidden()) {
+            return post;
+        }
+        if (viewer == null) {
+            return null;
+        }
 
         boolean isAdmin = viewer.getGroupId() == 1;
         boolean isAuthor = viewer.getId() == post.getUserId();
