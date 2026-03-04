@@ -62,22 +62,30 @@ public class PostList extends HttpServlet {
         return post.getUserId() == u.getId();
     }
 
-    private boolean IsValidReferer(HttpServletRequest request) {
-        String referer = request.getHeader("referer");
+private boolean IsValidReferer(HttpServletRequest request) {
+    String referer = request.getHeader("referer");
 
-        if (referer == null) {
-            return false;
-        }
-
-        String expectedURL = 
-                request.getScheme() + "://"
-                + request.getServerName() + ":"
-                + request.getServerPort()
-                + request.getContextPath()
-                + "/admin/posts";
-
-        return referer.startsWith(expectedURL);
+    if (referer == null || referer.isEmpty()) {
+        return false;
     }
+    
+    String scheme = request.getScheme();
+    String serverName = request.getServerName();
+    int port = request.getServerPort();
+
+    StringBuilder expectedURL = new StringBuilder();
+    expectedURL.append(scheme).append("://").append(serverName);
+    
+    if ((scheme.equals("http") && port != 80) ||
+        (scheme.equals("https") && port != 443)) {
+        expectedURL.append(":").append(port);
+    }
+   
+    expectedURL.append(request.getContextPath())
+               .append("/admin/posts");
+
+    return referer.startsWith(expectedURL.toString());
+}
 
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
