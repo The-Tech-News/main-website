@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>The Tech News - Đăng Nhập</title>
 <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
@@ -25,7 +25,7 @@
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button>
                         <br><br>
-                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Đăng nhập với Keycloak</a>
+                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Đăng nhập bằng SSO</a>
                     </form>
                 </div>
             </div>
