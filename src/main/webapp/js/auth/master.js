@@ -7,5 +7,5 @@ $('#hashForm').submit(function() {
     const md5Str = CryptoJS.MD5(rawPass).toString();
 
     document.getElementById('password').value = md5Str;
-    return true; // return false to cancel form action
+    return true;
 });
