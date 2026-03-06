@@ -1,0 +1,93 @@
+/* Simple comment UI styles */
+.comments-section {
+    max-width: 760px;
+    margin: 16px auto;
+    font-family: Segoe UI, Roboto, Arial, sans-serif
+}
+
+.comments-title {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    color: #222
+}
+
+.comment-form-wrap {
+    margin-bottom: 12px
+}
+
+#comment-content {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    font-size: 14px
+}
+
+.comment-form-actions {
+    margin-top: 8px;
+    text-align: right
+}
+
+.btn {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer
+}
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+    border-color: #007bff
+}
+
+.btn-link {
+    background: transparent;
+    color: #007bff;
+    border: 0;
+    padding: 0
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0
+}
+
+.comment-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee
+}
+
+.comment-meta {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px
+}
+
+.comment-author {
+    font-weight: 600;
+    margin-right: 8px
+}
+
+.comment-body {
+    font-size: 14px;
+    color: #111;
+    white-space: pre-wrap
+}
+
+.comment-actions {
+    margin-top: 8px
+}
+
+.delete-btn {
+    color: #c00
+}
+
+@media (max-width:600px) {
+    .comments-section {
+        padding: 8px
+    }
+}
