@@ -16,21 +16,20 @@ import java.util.ArrayList;
 @WebServlet(name = "Statistic", urlPatterns = {"/admin/stat"})
 public class Statistic extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
     private final StatisticDAO statDAO = new StatisticDAO();
     private final String numberRegex = "^[0-9]+$";
 
     private boolean IsAdmin(User u) {
-        return u != null && u.getGroupId() == 1;
+        return (u != null && u.getGroupId() == 1);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
-
-        if (!IsAdmin(loggedUser)) {
+        
+        if (!IsAdmin((User) session.getAttribute("loggedUser"))) {
             response.sendError(404);
             return;
         }
