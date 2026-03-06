@@ -170,7 +170,10 @@ public class Auth extends HttpServlet {
         session.setAttribute("oidc_state", state);
 
         String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + "/auth?action=oidc_callback";
-
+        
+        // Replace with HTTPS
+        redirectUri = redirectUri.replace("http://", "https://");
+        
         String authUrl = String.format(
                 "%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=openid%%20profile%%20email&state=%s",
                 this.OidcIssuer,

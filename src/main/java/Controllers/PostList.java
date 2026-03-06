@@ -61,24 +61,7 @@ public class PostList extends HttpServlet {
 
         return post.getUserId() == u.getId();
     }
-
-    private boolean IsValidReferer(HttpServletRequest request) {
-        String referer = request.getHeader("referer");
-
-        if (referer == null) {
-            return false;
-        }
-
-        String expectedURL = 
-                request.getScheme() + "://"
-                + request.getServerName() + ":"
-                + request.getServerPort()
-                + request.getContextPath()
-                + "/admin/posts";
-
-        return referer.startsWith(expectedURL);
-    }
-
+    
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
@@ -276,11 +259,7 @@ public class PostList extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             return;
         }
-
-        if (!IsValidReferer(request)) {
-            response.sendError(403, "Invalid request source");
-            return;
-        }
+        
         switch (request.getParameter("action")) {
             case "create" -> {
                 this.CreatePost(request, response);
