@@ -1,6 +1,7 @@
 package Controllers;
 
 import Models.DAO.PostDAO;
+import Models.DAO.StatisticDAO;
 import Models.Objects.User;
 
 import jakarta.servlet.ServletException;
@@ -19,6 +20,7 @@ public class Post extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final PostDAO postDAO = new PostDAO();
+    private final StatisticDAO statDAO = new StatisticDAO();
     private final String numberRegex = "^[0-9]+$";
 
     @Override
@@ -56,7 +58,9 @@ public class Post extends HttpServlet {
             response.sendError(404);
             return;
         }
-
+        
+        statDAO.IncreaseViewCount(id);
+        
         request.setAttribute("post", post);
         request.getRequestDispatcher("/WEB-INF/JSPViews/PostView/Detail.jsp").forward(request, response);
     }

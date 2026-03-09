@@ -26,16 +26,21 @@ public class Statistic extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         HttpSession session = request.getSession(false);
-        
-        if (!IsAdmin((User) session.getAttribute("loggedUser"))) {
+        User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
+
+        // Admin only
+        if (!IsAdmin(loggedUser)) {
             response.sendError(404);
             return;
         }
 
         String action = request.getParameter("action");
         if (action == null) action = "list";
+
         if (!action.equals("list")) {
             response.sendError(404);
             return;
@@ -46,18 +51,13 @@ public class Statistic extends HttpServlet {
 
         if (topStr != null && !topStr.isBlank()) {
             if (!topStr.matches(numberRegex)) {
-                response.sendError(400, "Invalid top");
+                response.sendError(400);
                 return;
             }
-            int top;
-            try {
-                top = Integer.parseInt(topStr);
-            } catch (NumberFormatException e) {
-                response.sendError(400, "Invalid top");
-                return;
-            }
+
+            int top = Integer.parseInt(topStr);
             if (top <= 0) {
-                response.sendError(400, "top must be > 0");
+                response.sendError(400);
                 return;
             }
 
