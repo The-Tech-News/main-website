@@ -165,14 +165,35 @@ public class Comment extends HttpServlet {
         try {
             URI uri = new URI(referer);
 
-            // Allow relative URLs (no scheme/host)
+            String contextPath = request.getContextPath();
+
+            // Handle relative URLs (no scheme/host)
             if (!uri.isAbsolute()) {
                 String path = uri.toString();
-                return path.isEmpty() ? defaultPath : path;
+
+                // Reject protocol-relative URLs like "//evil.com/path"
+                if (path.startsWith("//")) {
+                    return defaultPath;
+                }
+
+                // Normalize to ensure we always redirect within our context path
+                if (path.isEmpty() || "/".equals(path)) {
+                    return defaultPath;
+                }
+
+                // If the path already starts with the context path, keep it
+                if (path.startsWith(contextPath)) {
+                    return path;
+                }
+
+                // Otherwise, prepend the context path to keep the redirect inside the app
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
+                }
+                return contextPath + path;
             }
 
             String serverName = request.getServerName();
-            String contextPath = request.getContextPath();
 
             // Only allow redirects to the same host and within the same context path
             if (serverName.equalsIgnoreCase(uri.getHost())) {
