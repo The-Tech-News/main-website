@@ -6,6 +6,8 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @WebServlet("/comment")
@@ -103,7 +105,8 @@ public class Comment extends HttpServlet {
         commentDAO.create(c);
 
         String referer = request.getHeader("Referer");
-        response.sendRedirect(referer != null ? referer : request.getContextPath() + "/");
+        String safeRedirect = getSafeRedirectTarget(request, referer, request.getContextPath() + "/");
+        response.sendRedirect(safeRedirect);
     }
 
     private void deleteComment(HttpServletRequest request, HttpServletResponse response)
@@ -143,6 +146,50 @@ public class Comment extends HttpServlet {
         commentDAO.hide(id);
 
         String referer = request.getHeader("Referer");
-        response.sendRedirect(referer != null ? referer : "home.jsp");
+        String safeRedirect = getSafeRedirectTarget(request, referer, request.getContextPath() + "/");
+        response.sendRedirect(safeRedirect);
+    }
+
+    /**
+     * Returns a safe redirect target based on the provided referer.
+     * <p>
+     * If the referer is a relative URI, it is returned as-is. If it is an absolute URI,
+     * it is only used when its host matches the current server name and its path starts
+     * with the current context path. Otherwise, the provided defaultPath is returned.
+     */
+    private String getSafeRedirectTarget(HttpServletRequest request, String referer, String defaultPath) {
+        if (referer == null || referer.isEmpty()) {
+            return defaultPath;
+        }
+
+        try {
+            URI uri = new URI(referer);
+
+            // Allow relative URLs (no scheme/host)
+            if (!uri.isAbsolute()) {
+                String path = uri.toString();
+                return path.isEmpty() ? defaultPath : path;
+            }
+
+            String serverName = request.getServerName();
+            String contextPath = request.getContextPath();
+
+            // Only allow redirects to the same host and within the same context path
+            if (serverName.equalsIgnoreCase(uri.getHost())) {
+                String path = uri.getPath();
+                if (path != null && path.startsWith(contextPath)) {
+                    String query = uri.getQuery();
+                    StringBuilder target = new StringBuilder(path);
+                    if (query != null && !query.isEmpty()) {
+                        target.append('?').append(query);
+                    }
+                    return target.toString();
+                }
+            }
+        } catch (URISyntaxException e) {
+            // fall through to default on parse error
+        }
+
+        return defaultPath;
     }
 }
