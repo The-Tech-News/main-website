@@ -102,7 +102,7 @@ public class Comment extends HttpServlet {
 
         commentDAO.create(c);
 
-        response.sendRedirect(request.getContextPath() + "/");
+        response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
     }
 
     private void deleteComment(HttpServletRequest request, HttpServletResponse response)
@@ -141,6 +141,6 @@ public class Comment extends HttpServlet {
 
         commentDAO.hide(id);
 
-        response.sendRedirect(request.getContextPath() + "/");
+        response.sendRedirect(request.getContextPath() + "/post?id=" + existing.getPostId());
     }
 }
