@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>The Tech News - Đăng Ký</title>
 <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
@@ -26,7 +26,9 @@
                             <input name="pwdHash" type="password" class="form-control" id="password"> 
                             <label for="floatingPassword">Mật khẩu</label> 
                         </div>
-                        <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng Ký</button> 
+                        <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng Ký</button>
+                        <br><br>
+                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Đăng kí bằng SSO</a>
                     </form>
                 </div>
             </div>
