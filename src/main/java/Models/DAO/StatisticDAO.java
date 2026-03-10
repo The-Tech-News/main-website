@@ -1,7 +1,6 @@
 package Models.DAO;
 
-import Models.DBContext;
-
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +8,11 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class StatisticDAO extends DBContext {
+import Models.DBContext;
+
+public class StatisticDAO {
+
+    private static final Logger LOGGER = Logger.getLogger(StatisticDAO.class.getName());
 
     public ArrayList<int[]> GetAll() {
         ArrayList<int[]> list = new ArrayList<>();
@@ -20,15 +23,16 @@ public class StatisticDAO extends DBContext {
             ORDER BY [count] DESC, postId ASC;
         """;
 
-        try (PreparedStatement ps = super.getConnection().prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(new int[]{ rs.getInt("postId"), rs.getInt("count") });
+                list.add(new int[]{rs.getInt("postId"), rs.getInt("count")});
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "GetAll failed", ex);
         }
 
         return list;
@@ -43,23 +47,24 @@ public class StatisticDAO extends DBContext {
             ORDER BY [count] DESC, postId ASC;
         """;
 
-        try (PreparedStatement ps = super.getConnection().prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, top);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(new int[]{ rs.getInt("postId"), rs.getInt("count") });
+                    list.add(new int[]{rs.getInt("postId"), rs.getInt("count")});
                 }
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "GetTop failed", ex);
         }
 
         return list;
     }
 
-    // Auto-increment views (Upsert)
     public void IncreaseViewCount(int postId) {
         String sql = """
             MERGE dbo.PostStat AS target
@@ -71,11 +76,14 @@ public class StatisticDAO extends DBContext {
                 INSERT (postId, [count]) VALUES (source.postId, 1);
         """;
 
-        try (PreparedStatement ps = super.getConnection().prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, postId);
             ps.executeUpdate();
+
         } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "IncreaseViewCount failed", ex);
         }
     }
 }
