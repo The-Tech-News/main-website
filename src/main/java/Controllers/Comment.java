@@ -102,8 +102,7 @@ public class Comment extends HttpServlet {
 
         commentDAO.create(c);
 
-        String referer = request.getHeader("Referer");
-        response.sendRedirect(referer != null ? referer : request.getContextPath() + "/");
+        response.sendRedirect(request.getContextPath() + "/");
     }
 
     private void deleteComment(HttpServletRequest request, HttpServletResponse response)
@@ -142,7 +141,6 @@ public class Comment extends HttpServlet {
 
         commentDAO.hide(id);
 
-        String referer = request.getHeader("Referer");
-        response.sendRedirect(referer != null ? referer : "home.jsp");
+        response.sendRedirect(request.getContextPath() + "/");
     }
 }
