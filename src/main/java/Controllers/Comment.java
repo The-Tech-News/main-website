@@ -11,16 +11,16 @@ import java.util.List;
 @WebServlet("/comment")
 public class Comment extends HttpServlet {
 
-    private CommentDAO commentDAO;
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    public void init() {
+    private CommentDAO commentDAO;
+    
+    public void Comment() {
         commentDAO = new CommentDAO();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String action = request.getParameter("action");
 
@@ -30,16 +30,17 @@ public class Comment extends HttpServlet {
         }
 
         switch (action) {
-            case "get" -> getComments(request, response);
+            case "get" ->
+                getComments(request, response);
             case "create", "delete" -> // create and delete must be POST
                 response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            default ->
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         if (action == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -47,32 +48,28 @@ public class Comment extends HttpServlet {
         }
 
         switch (action) {
-            case "create" -> createComment(request, response);
-            case "delete" -> deleteComment(request, response);
-            default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            case "create" ->
+                createComment(request, response);
+            case "delete" ->
+                deleteComment(request, response);
+            default ->
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
-    private void getComments(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String postIdRaw = request.getParameter("postid");
-        int postId;
+    private void getComments(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            postId = Integer.parseInt(postIdRaw);
-        } catch (Exception ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            int postId = Integer.parseInt(request.getParameter("postid"));
+            List<Models.Objects.Comment> comments = commentDAO.getByPostId(postId);
+            request.setAttribute("comments", comments);
+            request.setAttribute("postId", postId);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/CommentView/Create.jsp").forward(request, response);
+        } catch (NumberFormatException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getLocalizedMessage());
         }
-
-        List<Models.Objects.Comment> comments = commentDAO.getByPostId(postId);
-
-        request.setAttribute("comments", comments);
-        request.setAttribute("postId", postId);
-        request.getRequestDispatcher("/WEB-INF/JSPViews/CommentView/Create.jsp").forward(request, response);
     }
 
-    private void createComment(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void createComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession(false);
         User user = session == null ? null : (User) session.getAttribute("loggedUser");
@@ -88,7 +85,7 @@ public class Comment extends HttpServlet {
         int postId;
         try {
             postId = Integer.parseInt(postIdRaw);
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -120,7 +117,7 @@ public class Comment extends HttpServlet {
         int id;
         try {
             id = Integer.parseInt(idRaw);
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
