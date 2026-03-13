@@ -13,47 +13,37 @@ public class Comment extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private CommentDAO commentDAO;
+    private final CommentDAO commentDAO;
     
-    public void Comment() {
-        commentDAO = new CommentDAO();
+    public Comment() {
+        this.commentDAO = new CommentDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        String action = request.getParameter("action");
-
-        if (action == null) {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
-
-        switch (action) {
-            case "get" ->
-                getComments(request, response);
-            case "create", "delete" -> // create and delete must be POST
-                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            default ->
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        // default action is redirecting to default '/'
+        switch (request.getParameter("action")) {
+            case "get" -> {
+                this.getComments(request, response);
+            }
+            default -> {
+                response.sendRedirect(request.getContextPath() + "/");
+            }
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (action == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        switch (action) {
-            case "create" ->
+        switch (request.getParameter("action")) {
+            case "create" -> {
                 createComment(request, response);
-            case "delete" ->
+            }
+            case "delete" -> {
                 deleteComment(request, response);
-            default ->
+            }
+            default -> {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            }
         }
     }
 
@@ -79,31 +69,26 @@ public class Comment extends HttpServlet {
             return;
         }
 
-        String postIdRaw = request.getParameter("postid");
-        String content = request.getParameter("content");
-
-        int postId;
         try {
-            postId = Integer.parseInt(postIdRaw);
+            int postId = Integer.parseInt(request.getParameter("postid"));
+            String content = request.getParameter("content");
+            
+            if (content == null || content.trim().isEmpty()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            Comment c = new Comment(0, user.getId(), postId, content.trim(), null, false);
+            
+            commentDAO.create(c);
+
+            response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
         } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
         }
-
-        if (content == null || content.trim().isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        Models.Objects.Comment c = new Models.Objects.Comment(0, user.getId(), postId, content.trim(), null, false);
-
-        commentDAO.create(c);
-
-        response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
     }
 
-    private void deleteComment(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void deleteComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession(false);
         User user = session == null ? null : (User) session.getAttribute("loggedUser");

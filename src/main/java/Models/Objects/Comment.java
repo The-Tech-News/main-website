@@ -4,18 +4,14 @@ import java.sql.Timestamp;
 
 public class Comment {
 
-    private int id;
-    private int userId;
-    private int postId;
+    private final int id;
+    private final int userId;
+    private final int postId;
     private String content;
-    private Timestamp createdAt;
+    private final Timestamp createdAt;
     private boolean isHidden;
 
-    public Comment() {
-    }
-
-    public Comment(int id, int userId, int postId, String content,
-            Timestamp createdAt, boolean isHidden) {
+    public Comment(int id, int userId, int postId, String content, Timestamp createdAt, boolean isHidden) {
         this.id = id;
         this.userId = userId;
         this.postId = postId;

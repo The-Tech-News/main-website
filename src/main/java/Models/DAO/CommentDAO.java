@@ -16,9 +16,9 @@ public class CommentDAO extends DBContext {
 
         String sql = """
             SELECT id, userId, postId, content, createdAt, isHidden
-            FROM Comment
-            WHERE postId = ? AND isHidden = 0
-            ORDER BY createdAt ASC
+                FROM Comment
+                WHERE postId = ? AND isHidden = 0
+                ORDER BY createdAt ASC;
         """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -46,7 +46,7 @@ public class CommentDAO extends DBContext {
     public void create(Comment c) {
         String sql = """
             INSERT INTO Comment (userId, postId, content)
-            VALUES (?, ?, ?)
+                VALUES (?, ?, ?);
         """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
