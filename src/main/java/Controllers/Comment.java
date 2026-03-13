@@ -78,7 +78,7 @@ public class Comment extends HttpServlet {
                 return;
             }
 
-            Comment c = new Comment(0, user.getId(), postId, content.trim(), null, false);
+            Models.Objects.Comment c = new Models.Objects.Comment(0, user.getId(), postId, content.trim(), null, false);
             
             commentDAO.create(c);
 
