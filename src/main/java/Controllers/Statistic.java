@@ -12,24 +12,25 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet(name = "Statistic", urlPatterns = {"/admin/stat"})
 public class Statistic extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(Statistic.class.getName());
+    private static final long serialVersionUID = 1L;
 
-    private final StatisticDAO statDAO = new StatisticDAO();
+    private final StatisticDAO statDAO;
     private final String numberRegex = "^[0-9]+$";
+
+    public Statistic() {
+        this.statDAO = new StatisticDAO();
+    }
 
     private boolean IsAdmin(User u) {
         return u != null && u.getGroupId() == 1;
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         try {
             HttpSession session = request.getSession(false);
@@ -75,8 +76,7 @@ public class Statistic extends HttpServlet {
             request.setAttribute("stats", stats);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
 
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Statistic servlet error", e);
+        } catch (ServletException | IOException | NumberFormatException e) {
             response.sendError(500);
         }
     }

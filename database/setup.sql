@@ -349,11 +349,12 @@ GO
 IF OBJECT_ID('dbo.PostStat', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.PostStat (
-        postId INT NOT NULL PRIMARY KEY,
+        [postId] INT PRIMARY KEY,
         [count] INT NOT NULL DEFAULT(0),
         [timestamp] DATETIME2 NULL
     );
 END
 GO
-INSERT INTO dbo.PostStat(postId,[count]) VALUES (1, 10);
-INSERT INTO dbo.PostStat(postId,[count]) VALUES (2, 3);
+
+INSERT INTO dbo.PostStat([postId],[count]) VALUES (1, 0)
+GO
