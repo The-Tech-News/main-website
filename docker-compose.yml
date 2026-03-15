@@ -15,7 +15,7 @@ services:
             timeout: 5s
             retries: 5
         restart: on-failure
-        image: anhvlt/the-tech-news:db-latest
+        image: anhvlttfs/the-tech-news:db-latest
 
     web-instance:
         container_name: tomcatweb
@@ -31,7 +31,7 @@ services:
             db-instance:
                 condition: service_healthy
         restart: always
-        image: anhvlt/the-tech-news:web-latest
+        image: anhvlttfs/the-tech-news:web-latest
 
 volumes:
     weblogs:
