@@ -11,7 +11,7 @@
     <body>
 <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
-            <h2>Create new post</h2>
+            <h2>Edit post</h2>
             <% 
                 ArrayList<Category> categories = (ArrayList<Category>) request.getAttribute("categories");
                 Post post = (Post) request.getAttribute("post");
