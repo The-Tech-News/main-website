@@ -339,3 +339,22 @@ GO
 
 EXECUTE sp_InsertPost 'About Windows', 'Windows is an operating system by Microsoft', 1, 1;
 GO
+
+/** TABLE: PostStat **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+IF OBJECT_ID('dbo.PostStat', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.PostStat (
+        [postId] INT PRIMARY KEY,
+        [count] INT NOT NULL DEFAULT(0),
+        [timestamp] DATETIME2 NULL
+    );
+END
+GO
+
+INSERT INTO dbo.PostStat([postId],[count]) VALUES (1, 0)
+GO
