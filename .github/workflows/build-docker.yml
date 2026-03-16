@@ -47,7 +47,7 @@ jobs:
           context: .
           file: ./.docker/dockerfile-web
           push: true
-          tags: 'anhvlt/the-tech-news:web-latest'
+          tags: 'anhvlttfs/the-tech-news:web-latest'
         if: github.ref == 'refs/heads/master'
 
       - name: Build MS SQL & Push to Docker Hub
@@ -56,5 +56,5 @@ jobs:
           context: .
           file: ./.docker/dockerfile-db
           push: true
-          tags: 'anhvlt/the-tech-news:db-latest'
+          tags: 'anhvlttfs/the-tech-news:db-latest'
         if: github.ref == 'refs/heads/master'
