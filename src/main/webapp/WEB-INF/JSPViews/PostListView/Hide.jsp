@@ -11,7 +11,7 @@
     <body>
 <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
-            <h2>Create new post</h2>
+            <h2>Hide Post</h2>
             <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=hide">
                 <div class="mb-3">
                     <label for="id" class="form-label">Post ID</label>
