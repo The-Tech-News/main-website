@@ -2,7 +2,9 @@ package Models.DAO;
 
 import Models.DBContext;
 import Models.Objects.Comment;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,16 +45,13 @@ public class CommentDAO extends DBContext {
     }
 
     // Create comment
-    public void create(Comment c) {
-        String sql = """
-            INSERT INTO Comment (userId, postId, content)
-                VALUES (?, ?, ?);
-        """;
+    public void create(int userId, int postId, String content) {
+        String sql = "{call sp_CreateComment(?, ?, ?)}";
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, c.getUserId());
-            ps.setInt(2, c.getPostId());
-            ps.setString(3, c.getContent());
+            ps.setInt(1, userId);
+            ps.setInt(2, postId);
+            ps.setString(3, content);
             ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -89,11 +88,12 @@ public class CommentDAO extends DBContext {
     }
 
     // Hide comment
-    public void hide(int id) {
-        String sql = "UPDATE Comment SET isHidden = 1 WHERE id = ?";
+    public void hide(int commentId, int requesterId) {
+        String sql = "{call sp_HideComment(?, ?)}";
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, id);
+            ps.setInt(1, commentId);
+            ps.setInt(2, requesterId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);

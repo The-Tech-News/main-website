@@ -2,9 +2,12 @@ package Controllers;
 
 import Models.DAO.CommentDAO;
 import Models.Objects.User;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -14,7 +17,7 @@ public class Comment extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final CommentDAO commentDAO;
-    
+
     public Comment() {
         this.commentDAO = new CommentDAO();
     }
@@ -72,15 +75,13 @@ public class Comment extends HttpServlet {
         try {
             int postId = Integer.parseInt(request.getParameter("postid"));
             String content = request.getParameter("content");
-            
+
             if (content == null || content.trim().isEmpty()) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
-            Models.Objects.Comment c = new Models.Objects.Comment(0, user.getId(), postId, content.trim(), null, false);
-            
-            commentDAO.create(c);
+            commentDAO.create(user.getId(), postId, content.trim());
 
             response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
         } catch (NumberFormatException ex) {
@@ -99,30 +100,17 @@ public class Comment extends HttpServlet {
         }
 
         String idRaw = request.getParameter("id");
-        int id;
+        String postIdRaw = request.getParameter("postid");
+        int id, postId;
         try {
             id = Integer.parseInt(idRaw);
+            postId = postIdRaw != null ? Integer.parseInt(postIdRaw) : 1;
         } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        Models.Objects.Comment existing = commentDAO.getById(id);
-        if (existing == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        boolean isOwner = existing.getUserId() == user.getId();
-        boolean isAdmin = user.getGroupId() == 1;
-
-        if (!isOwner && !isAdmin) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
-        commentDAO.hide(id);
-
-        response.sendRedirect(request.getContextPath() + "/post?id=" + existing.getPostId());
+        commentDAO.hide(id, user.getId());
+        response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
     }
 }
