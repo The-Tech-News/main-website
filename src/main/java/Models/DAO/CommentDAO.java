@@ -61,10 +61,10 @@ public class CommentDAO extends DBContext {
     // Get comment by id
     public Comment getById(int id) {
         String sql = """
-            SELECT id, userId, postId, content, createdAt, isHidden
-            FROM Comment
-            WHERE id = ?
-        """;
+                    SELECT id, userId, postId, content, createdAt, isHidden
+                        FROM Comment
+                        WHERE id = ?;
+                    """;
 
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, id);
