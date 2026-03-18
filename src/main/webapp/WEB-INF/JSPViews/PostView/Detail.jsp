@@ -1,11 +1,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="Models.Objects.Post"%>
+<%@page import="Models.Objects.Post, Models.Objects.Comment, Models.Objects.User, java.util.List"%>
 
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
 <head>
     <title>The Tech News - Post</title>
     <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/comment.css">
+    <script src="${pageContext.request.contextPath}/js/global/comment.js" defer></script>
 </head>
 
 <body>
@@ -40,6 +42,57 @@
 
                 <div class="mt-3" style="white-space: pre-wrap;">
                     <%= post.getContent() %>
+                </div>
+
+                <%
+                    List<Comment> comments = (List<Comment>) request.getAttribute("comments");
+                    if (comments == null) comments = java.util.Collections.emptyList();
+
+                    User currentUser = (User) session.getAttribute("loggedUser");
+                %>
+
+                <div class="comments-section mt-4" data-postid="<%= post.getId() %>">
+                    <h3 class="comments-title">Comments (<span class="comments-count"><%= comments.size() %></span>)</h3>
+
+                    <div class="comment-form-wrap">
+                        <form id="comment-form" action="${pageContext.request.contextPath}/comment?action=create" method="post">
+                            <input type="hidden" name="postid" value="<%= post.getId() %>">
+                            <textarea name="content" id="comment-content" rows="3" placeholder="Write a comment..."></textarea>
+                            <div class="comment-form-actions">
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <ul class="comment-list">
+                        <% for (Comment c : comments) { %>
+                            <li class="comment-item" data-id="<%= c.getId() %>">
+                                <div class="comment-meta">
+                                    <span class="comment-author">User <%= c.getUserId() %></span>
+                                    <span class="comment-date"><%= (c.getCreatedAt() != null ? c.getCreatedAt().toString() : "") %></span>
+                                </div>
+                                <%
+                                    String raw = c.getContent() == null ? "" : c.getContent();
+                                    String escaped = raw.replace("&", "&amp;").replace("<", "&lt;")
+                                            .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;");
+                                %>
+                                <div class="comment-body"><%= escaped %></div>
+                                <div class="comment-actions">
+                                    <% boolean canDelete = false;
+                                       if (currentUser != null) {
+                                           canDelete = (currentUser.getId() == c.getUserId()) || (currentUser.getGroupId() == 1);
+                                       }
+                                    %>
+                                    <% if (canDelete) { %>
+                                        <form class="comment-delete-form" action="${pageContext.request.contextPath}/comment?action=delete" method="post" onsubmit="return confirm('Delete this comment?');">
+                                            <input type="hidden" name="id" value="<%= c.getId() %>">
+                                            <button type="submit" class="btn btn-link delete-btn">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </li>
+                        <% } %>
+                    </ul>
                 </div>
 
                 <div class="mt-4">

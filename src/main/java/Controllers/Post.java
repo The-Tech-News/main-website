@@ -1,6 +1,7 @@
 package Controllers;
 
 import Models.DAO.PostDAO;
+import Models.DAO.CommentDAO;
 import Models.DAO.StatisticDAO;
 import Models.Objects.User;
 
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @WebServlet(name = "Post", urlPatterns = {"/post"})
 public class Post extends HttpServlet {
@@ -20,7 +22,9 @@ public class Post extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final PostDAO postDAO = new PostDAO();
+    private final CommentDAO commentDAO = new CommentDAO();
     private final StatisticDAO statDAO = new StatisticDAO();
+
     private final String numberRegex = "^[0-9]+$";
 
     @Override
@@ -58,10 +62,10 @@ public class Post extends HttpServlet {
             response.sendError(404);
             return;
         }
-        
+        List<Models.Objects.Comment> comments = commentDAO.getByPostId(id);
         statDAO.IncreaseViewCount(id);
-        
         request.setAttribute("post", post);
+        request.setAttribute("comments", comments);
         request.getRequestDispatcher("/WEB-INF/JSPViews/PostView/Detail.jsp").forward(request, response);
     }
 }
