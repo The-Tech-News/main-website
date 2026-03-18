@@ -99,18 +99,14 @@ public class Comment extends HttpServlet {
             return;
         }
 
-        String idRaw = request.getParameter("id");
-        String postIdRaw = request.getParameter("postid");
         int id, postId;
         try {
-            id = Integer.parseInt(idRaw);
-            postId = postIdRaw != null ? Integer.parseInt(postIdRaw) : 1;
+            id = Integer.parseInt(request.getParameter("id"));
+            postId = (request.getParameter("postid")) != null ? Integer.parseInt(request.getParameter("postid")) : 1;
+            commentDAO.hide(id, user.getId());
+            response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
         } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
         }
-
-        commentDAO.hide(id, user.getId());
-        response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
     }
 }
