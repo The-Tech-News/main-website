@@ -69,4 +69,33 @@ public class CommentDAO extends DBContext {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public Comment GetComment(int id) {
+        Comment c = null;
+        
+        String sqlComm = """
+                         SELECT TOP(1) [id], [userId], [postId], [content], [createdAt], [isHidden]
+                            FROM [Comment]
+                            WHERE [id] = ?;
+                         """;
+        
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlComm)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                c = new Comment(
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getInt("postId"),
+                        rs.getString("content"),
+                        rs.getTimestamp("createdAt"),
+                        rs.getBoolean("isHidden")
+                );
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return c;
+    }
 }

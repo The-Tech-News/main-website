@@ -18,7 +18,7 @@
             HashMap<Integer, Category> categoryList = (HashMap<Integer, Category>) request.getAttribute("category");
             HashMap<Integer, String> userList = (HashMap<Integer, String>) request.getAttribute("users");
         %>
-
+        <br>
         <main class="container">
             <div class="row mb-2">
                 <% for (Post p : postList) {%>
