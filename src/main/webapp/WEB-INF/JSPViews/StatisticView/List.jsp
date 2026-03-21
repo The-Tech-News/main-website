@@ -30,9 +30,7 @@
                 if (stats == null || stats.isEmpty()) {
             %>
             <div class="alert alert-info">No stats yet.</div>
-            <%
-            } else {
-            %>
+            <% } else { %>
             <div class="card shadow-sm">
                 <div class="card-body">
                     <table class="table table-sm table-striped mb-0">
@@ -64,9 +62,7 @@
                     </table>
                 </div>
             </div>
-            <%
-                }
-            %>
+            <% }%>
         </main>
         <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
         <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
