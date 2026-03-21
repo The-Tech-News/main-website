@@ -37,13 +37,15 @@ public class Post extends HttpServlet {
 
     private void GetHomePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setAttribute("posts", postDAO.GetHomePosts());
+        request.setAttribute("categories", this.categoryDao.GetHashCategory());
+        request.setAttribute("users", this.userDAO.GetUserName());
         request.getRequestDispatcher("/WEB-INF/JSPViews/PostView/Home.jsp").forward(request, response);
     }
 
     private void GetPostId(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
-            
+
             Models.Objects.Post p = this.postDAO.GetPostId(id);
             if (p == null) {
                 response.sendError(404, "Post not found");
