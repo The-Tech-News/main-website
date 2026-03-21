@@ -1,16 +1,5 @@
 package Models.Objects;
 
-/**
- * Lớp Ads dùng để biểu diễn một quảng cáo trong hệ thống.
- * 
- * Đây là một Model Object (POJO) dùng để:
- * - Lưu dữ liệu quảng cáo từ database
- * - Truyền dữ liệu giữa DAO, Servlet và JSP
- * 
- * Các thuộc tính tương ứng với các cột trong bảng Ads của database.
- * 
- * @author PC
- */
 public class Ads {
 
     // id của quảng cáo (Primary Key trong database)
@@ -27,17 +16,16 @@ public class Ads {
 
     /**
      * Constructor rỗng.
-     * 
-     * Dùng khi:
-     * - Tạo object Ads trước rồi set dữ liệu sau
-     * - Framework hoặc thư viện cần constructor mặc định
+     *
+     * Dùng khi: - Tạo object Ads trước rồi set dữ liệu sau - Framework hoặc thư
+     * viện cần constructor mặc định
      */
     public Ads() {
     }
 
     /**
      * Constructor đầy đủ tham số.
-     * 
+     *
      * Dùng để khởi tạo object Ads với đầy đủ thông tin.
      *
      * @param id id của quảng cáo
@@ -47,17 +35,17 @@ public class Ads {
      */
     public Ads(int id, int postId, String title, String uriImage) {
 
-        // gán giá trị id cho thuộc tính id của object
-        this.id = id;
+	// gán giá trị id cho thuộc tính id của object
+	this.id = id;
 
-        // gán giá trị postId cho thuộc tính postId
-        this.postId = postId;
+	// gán giá trị postId cho thuộc tính postId
+	this.postId = postId;
 
-        // gán tiêu đề quảng cáo
-        this.title = title;
+	// gán tiêu đề quảng cáo
+	this.title = title;
 
-        // gán đường dẫn hình ảnh
-        this.uriImage = uriImage;
+	// gán đường dẫn hình ảnh
+	this.uriImage = uriImage;
     }
 
     /**
@@ -67,8 +55,8 @@ public class Ads {
      */
     public int getId() {
 
-        // trả về id
-        return id;
+	// trả về id
+	return id;
     }
 
     /**
@@ -78,8 +66,8 @@ public class Ads {
      */
     public void setId(int id) {
 
-        // gán id mới
-        this.id = id;
+	// gán id mới
+	this.id = id;
     }
 
     /**
@@ -89,8 +77,8 @@ public class Ads {
      */
     public int getPostId() {
 
-        // trả về postId
-        return postId;
+	// trả về postId
+	return postId;
     }
 
     /**
@@ -100,8 +88,8 @@ public class Ads {
      */
     public void setPostId(int postId) {
 
-        // gán postId mới
-        this.postId = postId;
+	// gán postId mới
+	this.postId = postId;
     }
 
     /**
@@ -111,8 +99,8 @@ public class Ads {
      */
     public String getTitle() {
 
-        // trả về tiêu đề
-        return title;
+	// trả về tiêu đề
+	return title;
     }
 
     /**
@@ -122,8 +110,8 @@ public class Ads {
      */
     public void setTitle(String title) {
 
-        // gán tiêu đề mới
-        this.title = title;
+	// gán tiêu đề mới
+	this.title = title;
     }
 
     /**
@@ -133,8 +121,8 @@ public class Ads {
      */
     public String getUriImage() {
 
-        // trả về đường dẫn ảnh
-        return uriImage;
+	// trả về đường dẫn ảnh
+	return uriImage;
     }
 
     /**
@@ -144,7 +132,7 @@ public class Ads {
      */
     public void setUriImage(String uriImage) {
 
-        // gán đường dẫn ảnh mới
-        this.uriImage = uriImage;
+	// gán đường dẫn ảnh mới
+	this.uriImage = uriImage;
     }
 }
