@@ -57,36 +57,7 @@ public class CommentDAO extends DBContext {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    // Get comment by id
-    public Comment getById(int id) {
-        String sql = """
-                    SELECT id, userId, postId, content, createdAt, isHidden
-                        FROM Comment
-                        WHERE id = ?;
-                    """;
-
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Comment(
-                            rs.getInt("id"),
-                            rs.getInt("userId"),
-                            rs.getInt("postId"),
-                            rs.getString("content"),
-                            rs.getTimestamp("createdAt"),
-                            rs.getBoolean("isHidden")
-                    );
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return null;
-    }
-
+    
     // Hide comment
     public void hide(int commentId, int requesterId) {
         String sql = "{call sp_HideComment(?, ?)}";

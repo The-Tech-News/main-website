@@ -1,5 +1,6 @@
 package Controllers;
 
+import Models.DAO.PostDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +12,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class Index extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+    private final PostDAO postDao;
+
+    public Index() {
+        this.postDao = new PostDAO();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
