@@ -1,8 +1,10 @@
 package Controllers;
 
+import Models.DAO.CategoryDAO;
 import Models.DAO.PostDAO;
 import Models.DAO.CommentDAO;
 import Models.DAO.StatisticDAO;
+import Models.DAO.UserDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,7 +21,9 @@ public class Post extends HttpServlet {
 
     private final PostDAO postDAO;
     private final CommentDAO commentDAO;
+    private final CategoryDAO categoryDao;
     private final StatisticDAO statDAO;
+    private final UserDAO userDAO;
 
     private final String numberRegex = "^[0-9]+$";
 
@@ -27,6 +31,8 @@ public class Post extends HttpServlet {
         this.postDAO = new PostDAO();
         this.commentDAO = new CommentDAO();
         this.statDAO = new StatisticDAO();
+        this.categoryDao = new CategoryDAO();
+        this.userDAO = new UserDAO();
     }
 
     private void GetHomePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -37,6 +43,7 @@ public class Post extends HttpServlet {
     private void GetPostId(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
+            
             Models.Objects.Post p = this.postDAO.GetPostId(id);
             if (p == null) {
                 response.sendError(404, "Post not found");
@@ -44,6 +51,8 @@ public class Post extends HttpServlet {
             }
 
             request.setAttribute("post", p);
+            request.setAttribute("category", this.categoryDao.GetCategory(p.getCategoryId()));
+            request.setAttribute("users", this.userDAO.GetUserName());
             request.setAttribute("comment", this.commentDAO.getByPostId(id));
 
             this.statDAO.IncreaseViewCount(id);

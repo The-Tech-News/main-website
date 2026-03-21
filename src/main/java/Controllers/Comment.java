@@ -27,7 +27,7 @@ public class Comment extends HttpServlet {
         // default action is redirecting to default '/'
         switch (request.getParameter("action")) {
             case "get" -> {
-                this.getComments(request, response);
+                this.GetComments(request, response);
             }
             default -> {
                 response.sendRedirect(request.getContextPath() + "/");
@@ -39,10 +39,10 @@ public class Comment extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         switch (request.getParameter("action")) {
             case "create" -> {
-                createComment(request, response);
+                CreateComment(request, response);
             }
             case "delete" -> {
-                deleteComment(request, response);
+                DeleteComment(request, response);
             }
             default -> {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -50,7 +50,7 @@ public class Comment extends HttpServlet {
         }
     }
 
-    private void getComments(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void GetComments(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int postId = Integer.parseInt(request.getParameter("postid"));
             List<Models.Objects.Comment> comments = commentDAO.getByPostId(postId);
@@ -62,7 +62,7 @@ public class Comment extends HttpServlet {
         }
     }
 
-    private void createComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void CreateComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession(false);
         User user = session == null ? null : (User) session.getAttribute("loggedUser");
@@ -89,7 +89,7 @@ public class Comment extends HttpServlet {
         }
     }
 
-    private void deleteComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void DeleteComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession(false);
         User user = session == null ? null : (User) session.getAttribute("loggedUser");

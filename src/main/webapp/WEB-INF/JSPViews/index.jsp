@@ -28,7 +28,7 @@
                             <strong class="d-inline-block mb-2 text-primary-emphasis"><%= categoryList.get(p.getCategoryId()).getName()%></strong>
                             <h3 class="mb-0"><%= p.getTitle()%></h3>
                             <div class="mb-1 text-body-secondary">By <%= userList.get(p.getUserId())%></div>
-                            <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
+                            <a href="<%= request.getContextPath()%>/post?id=<%= p.getId()%>" class="icon-link gap-1 icon-link-hover stretched-link">
                                 Continue reading
                                 <svg class="bi" aria-hidden="true">
                                 <use xlink:href="#chevron-right"/>

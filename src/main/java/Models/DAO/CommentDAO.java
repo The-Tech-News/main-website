@@ -6,15 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CommentDAO extends DBContext {
 
     // Get comment by postId
-    public List<Comment> getByPostId(int postId) {
-        List<Comment> list = new ArrayList<>();
+    public ArrayList<Comment> getByPostId(int postId) {
+        ArrayList<Comment> list = new ArrayList<>();
 
         String sql = """
             SELECT id, userId, postId, content, createdAt, isHidden
