@@ -66,16 +66,16 @@ public class PostListDAO extends DBContext {
 
         return posts;
     }
-    
+
     public Post GetPostById(int postId) {
         Post post = null;
-        
+
         String sqlCommand = """
                             SELECT [id], [userId], [categoryId], [title], [content], [isHidden]
                                 FROM [technewsdb].[dbo].[Post]
                                 WHERE [id] = ?;
                             """;
-        
+
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -93,13 +93,13 @@ public class PostListDAO extends DBContext {
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return post;
     }
 
     public int InsertPost(String title, String content, int userId, int categoryId) {
         int returnValue = -1;
-        
+
         String sqlCommand = """
                             DECLARE	@return_value int;
                             EXEC	@return_value = [technewsdb].[dbo].[sp_InsertPost]
@@ -125,13 +125,13 @@ public class PostListDAO extends DBContext {
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return returnValue;
     }
 
     public int UpdatePost(int id, String title, String content, int categoryId) {
         int returnValue = -1;
-        
+
         String sqlCommand = """
                             DECLARE	@return_value int;
                             EXEC	@return_value = [technewsdb].[dbo].[sp_UpdatePost]
@@ -157,13 +157,13 @@ public class PostListDAO extends DBContext {
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return returnValue;
     }
 
     public int HidePost(int id) {
         int returnValue = -1;
-        
+
         String sqlCommand = """
                             DECLARE	@return_value int;
                             EXEC	@return_value = [technewsdb].[dbo].[sp_HidePost]
@@ -183,7 +183,33 @@ public class PostListDAO extends DBContext {
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
+        return returnValue;
+    }
+    
+    public int UnhidePost(int id) {
+        int returnValue = -1;
+
+        String sqlCommand = """
+                            DECLARE	@return_value int;
+                            EXEC	@return_value = [technewsdb].[dbo].[sp_UnhidePost]
+                                        @postId = ?;
+                            SELECT	'retval' = @return_value;
+                            """;
+
+        try (PreparedStatement ps = getConnection().prepareStatement(sqlCommand)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    returnValue = rs.getInt("retval");
+                }
+            } catch (SQLException sqlEx) {
+                Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+
         return returnValue;
     }
 }
