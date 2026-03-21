@@ -12,7 +12,7 @@
         <title>The Tech News - Post</title>
         <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/comment.css">
-        <script src="${pageContext.request.contextPath}/js/global/comment.js" defer></script>
+        <script async src="${pageContext.request.contextPath}/js/global/comment.js" defer></script>
     </head>
 
     <body>
@@ -70,10 +70,7 @@
                                 for (Comment c : comments) {
                                     String raw = c.getContent() == null ? "" : c.getContent();
                                     String escaped = raw.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;");
-                                    boolean canDelete = false;
-                                    if (currentUser != null) {
-                                        canDelete = (currentUser.getId() == c.getUserId()) || (currentUser.getGroupId() == 1);
-                                    }
+                                    boolean canDelete = (currentUser != null) ? (currentUser.getId() == c.getUserId() || currentUser.getGroupId() == 1) : false;
                             %>
                             <li class="comment-item" data-id="<%= c.getId()%>">
                                 <div class="comment-meta">

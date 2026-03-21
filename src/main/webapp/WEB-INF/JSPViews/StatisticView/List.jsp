@@ -13,7 +13,6 @@
         <main class="container py-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="h4 mb-0">Statistics</h1>
-
                 <form class="d-flex gap-2" method="get" action="<%= request.getContextPath()%>/admin/stat">
                     <input type="hidden" name="action" value="list"/>
                     <input class="form-control form-control-sm" style="max-width:120px"
