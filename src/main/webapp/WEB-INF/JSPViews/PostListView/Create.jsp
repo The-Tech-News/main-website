@@ -6,10 +6,10 @@
 <html lang="en">
     <head>
         <title>Admin Post - Create</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <h2>Create new post</h2>
             <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=create">
@@ -29,7 +29,7 @@
                             ArrayList<Category> categories = (ArrayList<Category>) request.getAttribute("categories");
                             for (Category c : categories) {
                         %>
-                        <option value="<%= c.getId() %>"><%= c.getName() %></option>
+                        <option value="<%= c.getId()%>"><%= c.getName()%></option>
                         <%
                             }
                         %>
@@ -40,6 +40,7 @@
                 </div>                
             </form>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>

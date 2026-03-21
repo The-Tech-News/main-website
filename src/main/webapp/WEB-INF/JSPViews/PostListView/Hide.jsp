@@ -6,10 +6,10 @@
 <html lang="en">
     <head>
         <title>Admin Post - Edit</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <h2>Hide Post</h2>
             <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=hide">
@@ -22,6 +22,7 @@
                 </div>
             </form>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>

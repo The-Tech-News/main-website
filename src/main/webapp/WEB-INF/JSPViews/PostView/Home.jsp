@@ -52,7 +52,7 @@
                 }
             %>
         </main>
-
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
         <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>
