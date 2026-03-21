@@ -2,6 +2,7 @@ package Controllers;
 
 import Models.DAO.CategoryDAO;
 import Models.DAO.PostListDAO;
+import Models.DAO.UserDAO;
 import Models.Objects.Post;
 import Models.Objects.User;
 
@@ -21,12 +22,14 @@ public class PostList extends HttpServlet {
 
     private final PostListDAO postObjectMgmt;
     private final CategoryDAO categoryObjectMgmt;
+    private final UserDAO userDao;
 
     private final String numberRegex = "^[0-9]+$";
 
     public PostList() {
         this.postObjectMgmt = new PostListDAO();
         this.categoryObjectMgmt = new CategoryDAO();
+        this.userDao = new UserDAO();
     }
 
     private boolean IsAuthenticated(HttpSession session) {
@@ -61,7 +64,7 @@ public class PostList extends HttpServlet {
 
         return post.getUserId() == u.getId();
     }
-    
+
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
@@ -205,6 +208,7 @@ public class PostList extends HttpServlet {
             }
             case "list" -> {
                 ArrayList<Post> posts = (IsAdmin(session)) ? postObjectMgmt.GetAll() : postObjectMgmt.GetPostsByUserId(u.getId());
+                request.setAttribute("users", this.userDao.GetUserName());
                 request.setAttribute("posts", posts);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/List.jsp").forward(request, response);
             }
@@ -259,7 +263,7 @@ public class PostList extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             return;
         }
-        
+
         switch (request.getParameter("action")) {
             case "create" -> {
                 this.CreatePost(request, response);
