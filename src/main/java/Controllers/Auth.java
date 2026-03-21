@@ -102,6 +102,8 @@ public class Auth extends HttpServlet {
         for (String cn : cookieHeadName) {
             Cookie c = new Cookie(cn, "");
             c.setMaxAge(0);
+            c.setHttpOnly(true);
+            c.setSecure(true);
             response.addCookie(c);
         }
     }
