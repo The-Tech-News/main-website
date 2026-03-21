@@ -39,6 +39,39 @@
                 </div>
                 <%  }%>
             </div>
+            <hr class="col-3 col-md-2 mb-5">
+            <div class="row mb-2">
+                <h1 class="text-body-emphasis">View all posts</h1>
+                <p>View all posts on the website. Free and no need to register anything.</p>
+                <div class="mb-5"> 
+                    <a href="<%= request.getContextPath()%>/post" class="btn btn-primary btn-lg px-4">View all posts</a> 
+                </div>
+            </div>
+
+            <div class="row g-5">
+                <div class="col-md-6">
+                    <h2 class="text-body-emphasis">For administrator</h2>
+                    <ul class="list-unstyled ps-0">
+                        <li>
+                            <a class="icon-link mb-1" href="<%= request.getContextPath()%>/admin/category" rel="noopener" target="_blank">Category Editing</a>
+                        </li>
+                        <li>
+                            <a class="icon-link mb-1" href="<%= request.getContextPath()%>/admin/stat" rel="noopener" target="_blank">View stat</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h2 class="text-body-emphasis">For registered users</h2>
+                    <ul class="list-unstyled ps-0">
+                        <li>
+                            <a class="icon-link mb-1" href="<%= request.getContextPath()%>/admin/post" rel="noopener" target="_blank">Post Editor</a>
+                        </li>
+                        <li>
+                            <a class="icon-link mb-1" href="https://keycloak.anhvlt.io.vn/realms/master/account" rel="noopener" target="_blank">Manage your account (OIDC)</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </main>
         <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
         <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
