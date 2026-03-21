@@ -22,7 +22,40 @@ public class PostDAO extends DBContext {
             """;
 
         try (
-                PreparedStatement ps = super.getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = super.getConnection().prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+            ) {
+            while (rs.next()) {
+                list.add(
+                        new Post(
+                                rs.getInt("id"),
+                                rs.getInt("userId"),
+                                rs.getInt("categoryId"),
+                                rs.getString("title"),
+                                rs.getString("content"),
+                                rs.getBoolean("isHidden")
+                        ));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return list;
+    }
+    
+    public ArrayList<Post> GetHomePostTop() {
+        ArrayList<Post> list = new ArrayList<>();
+        String sql = """
+                SELECT TOP(2) [id], [userId], [categoryId], [title], [content], [isHidden]
+                    FROM [technewsdb].[dbo].[Post]
+                    WHERE [isHidden] = 0
+                    ORDER BY [id] DESC;
+            """;
+
+        try (
+                PreparedStatement ps = super.getConnection().prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+            ) {
             while (rs.next()) {
                 list.add(
                         new Post(
