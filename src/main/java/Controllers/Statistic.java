@@ -19,7 +19,7 @@ public class Statistic extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final StatisticDAO statDAO;
-    
+
     private final String numberRegex = "^[0-9]+$";
 
     public Statistic() {
@@ -76,7 +76,6 @@ public class Statistic extends HttpServlet {
 
             request.setAttribute("stats", stats);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
-
         } catch (ServletException | IOException | NumberFormatException e) {
             response.sendError(500);
         }
