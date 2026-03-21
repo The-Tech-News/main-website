@@ -3,10 +3,10 @@
 <html lang="en">
     <head>
         <title>Admin Category - Create new</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <div class="my-3 p-3 bg-body rounded shadow-sm">
                 <form id="hashForm" class="p-4 p-md-5 rounded-3" action="<%= request.getContextPath()%>/admin/category?action=create" method="POST">
@@ -24,6 +24,7 @@
                 </form>
             </div>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>

@@ -7,9 +7,9 @@ public class Comment {
     private final int id;
     private final int userId;
     private final int postId;
-    private String content;
+    private final String content;
     private final Timestamp createdAt;
-    private boolean isHidden;
+    private final boolean isHidden;
 
     public Comment(int id, int userId, int postId, String content, Timestamp createdAt, boolean isHidden) {
         this.id = id;
@@ -42,13 +42,5 @@ public class Comment {
 
     public boolean isHidden() {
         return isHidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        isHidden = hidden;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 }

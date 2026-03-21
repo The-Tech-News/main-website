@@ -19,6 +19,7 @@ public class Statistic extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final StatisticDAO statDAO;
+
     private final String numberRegex = "^[0-9]+$";
 
     public Statistic() {
@@ -38,7 +39,7 @@ public class Statistic extends HttpServlet {
 
             // Admin only
             if (!IsAdmin(loggedUser)) {
-                response.sendError(404);
+                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
 
@@ -48,7 +49,7 @@ public class Statistic extends HttpServlet {
             }
 
             if (!action.equals("list")) {
-                response.sendError(404);
+                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
 
@@ -57,13 +58,13 @@ public class Statistic extends HttpServlet {
 
             if (topStr != null && !topStr.isBlank()) {
                 if (!topStr.matches(numberRegex)) {
-                    response.sendError(400);
+                    response.sendError(500);
                     return;
                 }
 
                 int top = Integer.parseInt(topStr);
                 if (top <= 0) {
-                    response.sendError(400);
+                    response.sendError(500);
                     return;
                 }
 
@@ -75,7 +76,6 @@ public class Statistic extends HttpServlet {
 
             request.setAttribute("stats", stats);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
-
         } catch (ServletException | IOException | NumberFormatException e) {
             response.sendError(500);
         }

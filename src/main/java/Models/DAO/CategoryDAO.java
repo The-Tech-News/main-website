@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +33,60 @@ public class CategoryDAO extends DBContext {
         }
 
         return catList;
+    }
+
+    public HashMap<Integer, Category> GetHashCategory() {
+        HashMap<Integer, Category> list = new HashMap<>();
+
+        String sqlCommand = """
+                            SELECT [id], [name], [description]
+                                FROM [technewsdb].[dbo].[Category];
+                            """;
+
+        try (
+                PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand); 
+                ResultSet rs = ps.executeQuery()
+            ) {
+            while (rs.next()) {
+                list.put(
+                        rs.getInt("id"),
+                        new Category(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("description")
+                        ));
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+
+        return list;
+    }
+    
+    public Category GetCategory(int id) {
+        Category c = null;
+        
+        String sqlComm = """
+                         SELECT TOP(1) [id], [name], [description]
+                            FROM [technewsdb].[dbo].[Category]
+                            WHERE [id] = ?;
+                         """;
+        
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlComm)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                c = new Category(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description")
+                );
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+        
+        return c;
     }
 
     public int NewCategory(String name, String description) {

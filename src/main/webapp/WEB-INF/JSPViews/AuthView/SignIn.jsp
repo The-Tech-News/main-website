@@ -3,11 +3,11 @@
 <html lang="en">
     <head>
         <title>The Tech News - Đăng Nhập</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
 
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="container col-xl-10 col-xxl-8 px-4 py-5">
             <div class="row align-items-center g-lg-5 py-5">
                 <div class="col-lg-7 text-center text-lg-start">
@@ -25,12 +25,13 @@
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng nhập</button>
                         <br><br>
-                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin" %>">Đăng nhập bằng SSO</a>
+                        <a class="w-100 btn btn-lg btn-primary" href="<%= request.getContextPath() + "/auth?action=oidc_signin"%>">Đăng nhập bằng SSO</a>
                     </form>
                 </div>
             </div>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
         <script src="<% out.print(request.getContextPath());%>/lib/crypto-js/crypto-js.min.js"></script>
         <script src="<% out.print(request.getContextPath());%>/js/auth/master.js"></script>
     </body>

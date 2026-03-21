@@ -2,7 +2,7 @@ package Models.Objects;
 
 public class Role {
     private final int id;
-    private String groupName;
+    private final String groupName;
     
     public Role(int id, String groupName) {
         this.id = id;
@@ -11,10 +11,6 @@ public class Role {
 
     public String getGroupName() {
         return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
     }
 
     public int getId() {
