@@ -337,6 +337,31 @@ BEGIN
 END
 GO
 
+/** Procedure: sp_UnhidePost **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE sp_UnhidePost
+    @postId INT
+AS
+BEGIN
+    IF NOT EXISTS (
+            SELECT 1
+                FROM [Post]
+                WHERE [id] = @postId
+    )
+    BEGIN
+        RAISERROR ('Post not found', 16, 1);
+        RETURN;
+    END
+
+    UPDATE [Post]
+        SET isHidden = 0
+        WHERE [id] = @postId
+END
+GO
+
 EXECUTE sp_InsertPost 'About Windows', 'Windows is an operating system by Microsoft', 1, 1;
 GO
 

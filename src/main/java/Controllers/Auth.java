@@ -34,6 +34,7 @@ import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -101,6 +102,8 @@ public class Auth extends HttpServlet {
         for (String cn : cookieHeadName) {
             Cookie c = new Cookie(cn, "");
             c.setMaxAge(0);
+            c.setHttpOnly(true);
+            c.setSecure(true);
             response.addCookie(c);
         }
     }
@@ -122,10 +125,10 @@ public class Auth extends HttpServlet {
         User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
         if (user != null) {
             String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
-            
+
             HttpSession session = request.getSession();
             session.setAttribute("loggedUser", user);
-            
+
             response.addCookie(this.RequestNewCookie("email", user.getEmail(), request.getContextPath()));
             response.addCookie(this.RequestNewCookie("name", encodedName, request.getContextPath()));
             response.sendRedirect(request.getContextPath() + "/");
@@ -170,7 +173,7 @@ public class Auth extends HttpServlet {
         session.setAttribute("oidc_state", state);
 
         String redirectUri = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath()) + "/auth?action=oidc_callback";
-        
+
         String authUrl = String.format(
                 "%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=openid%%20profile%%20email&state=%s",
                 this.OidcIssuer,
@@ -188,7 +191,7 @@ public class Auth extends HttpServlet {
         String code = request.getParameter("code");
 
         HttpSession session = request.getSession();
-        
+
         if (session == null || state == null || !state.equals(session.getAttribute("oidc_state"))) {
             response.sendError(400, "Invalid OIDC state.");
             return;
@@ -285,15 +288,15 @@ public class Auth extends HttpServlet {
                 // Find or create u user
                 User u = this.userObjectMgmt.GetUserSignIn(email);
                 String placeholderPwd = UUID.randomUUID().toString().replace("-", "");
-                
+
                 if (u == null) {
                     int created = this.userObjectMgmt.CreateNewUser(email, placeholderPwd, name);
-                    
+
                     if (created != 0) {
                         response.sendError(500, "Could not create local user for OIDC account.");
                         return;
                     }
-                    
+
                     u = this.userObjectMgmt.GetUserSignIn(email, placeholderPwd);
                 }
 

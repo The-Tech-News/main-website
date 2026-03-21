@@ -6,15 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CommentDAO extends DBContext {
 
     // Get comment by postId
-    public List<Comment> getByPostId(int postId) {
-        List<Comment> list = new ArrayList<>();
+    public ArrayList<Comment> getByPostId(int postId) {
+        ArrayList<Comment> list = new ArrayList<>();
 
         String sql = """
             SELECT id, userId, postId, content, createdAt, isHidden
@@ -57,36 +56,7 @@ public class CommentDAO extends DBContext {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    // Get comment by id
-    public Comment getById(int id) {
-        String sql = """
-                    SELECT id, userId, postId, content, createdAt, isHidden
-                        FROM Comment
-                        WHERE id = ?;
-                    """;
-
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Comment(
-                            rs.getInt("id"),
-                            rs.getInt("userId"),
-                            rs.getInt("postId"),
-                            rs.getString("content"),
-                            rs.getTimestamp("createdAt"),
-                            rs.getBoolean("isHidden")
-                    );
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return null;
-    }
-
+    
     // Hide comment
     public void hide(int commentId, int requesterId) {
         String sql = "{call sp_HideComment(?, ?)}";
@@ -98,5 +68,34 @@ public class CommentDAO extends DBContext {
         } catch (SQLException ex) {
             Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public Comment GetComment(int id) {
+        Comment c = null;
+        
+        String sqlComm = """
+                         SELECT TOP(1) [id], [userId], [postId], [content], [createdAt], [isHidden]
+                            FROM [Comment]
+                            WHERE [id] = ?;
+                         """;
+        
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlComm)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                c = new Comment(
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getInt("postId"),
+                        rs.getString("content"),
+                        rs.getTimestamp("createdAt"),
+                        rs.getBoolean("isHidden")
+                );
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CommentDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return c;
     }
 }

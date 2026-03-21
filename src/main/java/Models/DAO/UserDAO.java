@@ -5,6 +5,7 @@ import Models.Objects.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -100,5 +101,27 @@ public class UserDAO extends DBContext {
         return returnValue;
     }
 
+    public HashMap<Integer, String> GetUserName() {
+        HashMap<Integer, String> list = new HashMap<>();
 
+        String sqlCommand = """
+                            SELECT [id], [name]
+                                FROM [technewsdb].[dbo].[User]
+                                WHERE isEnabled = 1;
+                            """;
+
+        try (
+                PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand);
+                ResultSet rs = ps.executeQuery()
+            ) 
+        {
+            while (rs.next()) {
+                list.put(rs.getInt("id"), rs.getString("name"));
+            }
+        } catch (SQLException sqlEx) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
+        }
+        
+        return list;
+    }
 }

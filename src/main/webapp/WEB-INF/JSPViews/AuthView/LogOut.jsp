@@ -3,10 +3,10 @@
 <html lang="en">
     <head>
         <title>The Tech News - Đăng Ký</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="container my-5">
             <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
                 <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
@@ -14,6 +14,7 @@
                 </div>
             </div>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>

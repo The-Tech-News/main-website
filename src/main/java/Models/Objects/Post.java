@@ -4,10 +4,10 @@ public class Post {
 
     private final int id;
     private final int userId;
-    private int categoryId;
-    private String title;
-    private String content;
-    private boolean isHidden;
+    private final int categoryId;
+    private final String title;
+    private final String content;
+    private final boolean isHidden;
 
     public Post(int id, int userId, int categoryId, String title, String content, boolean isHidden) {
         this.id = id;
@@ -17,7 +17,7 @@ public class Post {
         this.content = content;
         this.isHidden = isHidden;
     }
-    
+
     public int getId() {
         return id;
     }
@@ -40,21 +40,5 @@ public class Post {
 
     public boolean isHidden() {
         return isHidden;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setHidden(boolean isHidden) {
-        this.isHidden = isHidden;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
     }
 }

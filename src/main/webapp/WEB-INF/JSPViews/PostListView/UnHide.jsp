@@ -11,8 +11,8 @@
     <body>
         <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
-            <h2>Hide Post</h2>
-            <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=hide">
+            <h2>Un-hide Post</h2>
+            <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=unhide">
                 <div class="mb-3">
                     <label for="id" class="form-label">Post ID</label>
                     <input type="text" id="id" name="id" class="form-control" value="<%= request.getAttribute("id")%>" readonly>

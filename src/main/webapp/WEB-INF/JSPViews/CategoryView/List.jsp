@@ -7,10 +7,10 @@
 <html lang="en">
     <head>
         <title>Admin Category - List</title>
-<%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
     </head>
     <body>
-<%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/pageHeader.jsp" %>
         <div class="col-lg-8 mx-auto">
             <div class="my-3 p-3 bg-body rounded shadow-sm">
                 <h6 class="border-bottom pb-2 mb-0">All categories</h6>
@@ -22,11 +22,11 @@
                     <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
                         <div class="d-flex justify-content-between">
                             <strong class="text-gray-dark">
-                                <code><%= c.getName() %></code>
+                                <code><%= c.getName()%></code>
                             </strong>
-                            <a href="<%= request.getContextPath()%>/admin/category?action=edit&oldName=<%= c.getName() %>">Edit <%= c.getName() %></a>
+                            <a href="<%= request.getContextPath()%>/admin/category?action=edit&oldName=<%= c.getName()%>">Edit <%= c.getName()%></a>
                         </div>
-                        <span class="d-block"><%= c.getDescription() %></span>
+                        <span class="d-block"><%= c.getDescription()%></span>
                     </div>
                 </div>
                 <%
@@ -37,6 +37,7 @@
                 </small>
             </div>
         </div>
-<%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
+        <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
     </body>
 </html>
