@@ -3,26 +3,30 @@
         <meta name="robots" content="index, follow">
         <meta name="description" content="The Tech News Project. Visit https://github.com/The-Tech-News for project" />
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        
+
         <meta property="og:title" content="The Tech News Project">
         <meta property="og:description" content="The Tech News Project. Visit https://github.com/The-Tech-News for project.">
         <meta property="og:site_name" content="The Tech News">
         <meta property="og:type" content="website">
-        
+
         <meta name="keyword" content="tech, news, tech news, sample, project, prj301, fpt, bootstrap, api, java-ee, java, github, gitlab, docker, online">
-        
+
         <link rel="stylesheet" href="<%= request.getContextPath()%>/lib/bootstrap/dist/css/bootstrap.min.css" >
         <link rel="stylesheet" href="<%= request.getContextPath()%>/css/master.css">
-        
+
         <script type="application/ld+json">
-           {
-             "@context": "https://schema.org",
-             "@type": "Website",
-             "name": "The Tech News Project",
-             "provider": {
-               "@type": "Organization",
-               "name": "The Tech News"
-             }
-           }
-       </script>
-       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5666835056664375" crossorigin="anonymous"></script>
+            {
+            "@context": "https://schema.org",
+            "@type": "Website",
+            "name": "The Tech News Project",
+            "provider": {
+            "@type": "Organization",
+            "name": "The Tech News"
+            }
+            }
+        </script>
+
+        <% String customTags = System.getenv("customHeadTags"); %>
+        <% if (customTags != null) {%>
+        <%= customTags%>
+        <% }%>
