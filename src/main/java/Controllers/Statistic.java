@@ -19,14 +19,26 @@ public class Statistic extends HttpServlet {
 
     private transient final StatisticDAO statDAO;
 
-    private final String numberRegex = "^[0-9]+$";
-
     public Statistic() {
         this.statDAO = new StatisticDAO();
     }
 
     private boolean IsAdmin(User u) {
-        return u != null && u.getGroupId() == 1;
+        return (u != null && u.getGroupId() == 1);
+    }
+
+    private void GetTop(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String topStr = request.getParameter("top");
+            ArrayList<int[]> stats
+                    = (topStr != null && !topStr.isBlank() && topStr.matches("^[0-9]+$"))
+                    ? statDAO.GetTop(Integer.parseInt(topStr))
+                    : statDAO.GetAll();
+            request.setAttribute("stats", stats);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendError(400);
+        }
     }
 
     @Override
@@ -34,46 +46,22 @@ public class Statistic extends HttpServlet {
         HttpSession session = request.getSession(false);
         User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
 
-        try {
-            // Admin only
-            if (!IsAdmin(loggedUser)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
-                return;
+        if (!IsAdmin(loggedUser)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
+            return;
+        }
+
+        switch (request.getParameter("action")) {
+            case null -> {
+                response.sendRedirect(request.getContextPath() + "/admin/stat?action=list");
             }
-
-            String action = request.getParameter("action");
-            if (action == null || !action.equals("list")) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
-                return;
+            case "list" -> {
+                this.GetTop(request, response);
             }
-
-            String topStr = request.getParameter("top");
-            ArrayList<int[]> stats;
-
-            if (topStr != null && !topStr.isBlank()) {
-                if (!topStr.matches(numberRegex)) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid 'top' parameter");
-                    return;
-                }
-
-                int top = Integer.parseInt(topStr);
-                if (top <= 0) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "'top' parameter must be greater than 0");
-                    return;
-                }
-
-                stats = statDAO.GetTop(top);
-                request.setAttribute("top", top);
-            } else {
-                stats = statDAO.GetAll();
+            default -> {
+                response.sendRedirect(request.getContextPath() + "/admin/stat?action=list");
             }
-
-            request.setAttribute("stats", stats);
-            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
-        } catch (ServletException | IOException | NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "An error occurred while processing the request");
         }
     }
 }
