@@ -1,30 +1,29 @@
 package Controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import Models.DAO.CategoryDAO;
 import Models.DAO.PostListDAO;
 import Models.DAO.UserDAO;
 import Models.Objects.Post;
 import Models.Objects.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.ArrayList;
 
 @WebServlet(name = "PostList", urlPatterns = {"/admin/posts"})
 public class PostList extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final PostListDAO postObjectMgmt;
-    private final CategoryDAO categoryObjectMgmt;
-    private final UserDAO userDao;
-
     private final String numberRegex = "^[0-9]+$";
+    private transient final PostListDAO postObjectMgmt;
+    private transient final CategoryDAO categoryObjectMgmt;
+    private transient final UserDAO userDao;
 
     public PostList() {
         this.postObjectMgmt = new PostListDAO();
@@ -66,11 +65,10 @@ public class PostList extends HttpServlet {
     }
 
     private void CreatePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         HttpSession session = request.getSession(false);
 
         if (session == null || !IsAuthenticated(session)) {
-            response.sendError(403, "Unauthorized");
+            response.sendError(401);
             return;
         }
 
@@ -81,12 +79,12 @@ public class PostList extends HttpServlet {
         String categoryIdStr = request.getParameter("categoryId");
 
         if (title == null || content == null || title.trim().isEmpty() || content.trim().isEmpty()) {
-            response.sendError(400, "Title and content must not be empty");
+            response.sendError(400);
             return;
         }
 
-        if (categoryIdStr == null || !categoryIdStr.matches(numberRegex)) {
-            response.sendError(400, "Invalid Category ID");
+        if (categoryIdStr == null) {
+            response.sendError(400);
             return;
         }
 
@@ -113,125 +111,68 @@ public class PostList extends HttpServlet {
     private void EditPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String title = request.getParameter("title");
         String content = request.getParameter("content");
-        int id = -1;
-        int categoryId = -1;
-
-        try {
-            String idStr = request.getParameter("id");
-            String categoryIdStr = request.getParameter("categoryId");
-
-            if (idStr == null || categoryIdStr == null) {
-                response.sendError(500, "Either User ID or Category ID is not specified");
-                return;
-            }
-
-            if (!idStr.matches(this.numberRegex) || !categoryIdStr.matches(this.numberRegex)) {
-                response.sendError(500, "Either User ID or Category ID must be a number");
-                return;
-            }
-
-            id = Integer.parseInt(idStr);
-            categoryId = Integer.parseInt(categoryIdStr);
-        } catch (NumberFormatException numex) {
-            response.sendError(500, "Unable to parse Id as integer");
-            return;
-        }
 
         if (title == null || content == null) {
-            response.sendError(500, "Either title or content should be not null");
+            response.sendError(400, "Either title or content should be not null");
             return;
         }
 
-        if (id == -1 || categoryId == -1) {
-            response.sendError(500, "Either title or content should be not null");
-            return;
-        }
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            int categoryId = Integer.parseInt(request.getParameter("categoryId"));
 
-        int executeQue = this.postObjectMgmt.UpdatePost(id, title, content, categoryId);
-        if (executeQue != 0) {
-            response.sendError(500, "The category could not be editied");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+            int executeQue = this.postObjectMgmt.UpdatePost(id, title, content, categoryId);
+            if (executeQue != 0) {
+                response.sendError(500, "The category could not be editied");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
+            }
+        } catch (NumberFormatException numex) {
+            response.sendError(400);
         }
     }
 
     private void HidePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int id = -1;
-
         try {
-            String idStr = request.getParameter("id");
+            int id = Integer.parseInt(request.getParameter("id"));
 
-            if (idStr == null) {
-                response.sendError(500, "Either User ID or Category ID is not specified");
-                return;
+            int executeQue = this.postObjectMgmt.HidePost(id);
+            
+            if (executeQue != 0) {
+                response.sendError(500, "The category could not be hiden");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
             }
-
-            if (!idStr.matches(this.numberRegex)) {
-                response.sendError(500, "Either User ID must be a number");
-                return;
-            }
-
-            id = Integer.parseInt(idStr);
         } catch (NumberFormatException numex) {
-            response.sendError(500, "Unable to parse Id as integer");
+            response.sendError(400, "Unable to parse Id as integer");
             return;
         }
 
-        if (id == -1) {
-            response.sendError(500, "Either title or content should be not null");
-            return;
-        }
-
-        int executeQue = this.postObjectMgmt.HidePost(id);
-        if (executeQue != 0) {
-            response.sendError(500, "The category could not be hiden");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-        }
     }
 
     private void UnHidePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int id = -1;
-
         try {
-            String idStr = request.getParameter("id");
-
-            if (idStr == null) {
-                response.sendError(500, "Either User ID or Category ID is not specified");
-                return;
+            int id = Integer.parseInt(request.getParameter("id"));
+            
+            int executeQue = this.postObjectMgmt.UnhidePost(id);
+            
+            if (executeQue != 0) {
+                response.sendError(500);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
             }
-
-            if (!idStr.matches(this.numberRegex)) {
-                response.sendError(500, "Either User ID must be a number");
-                return;
-            }
-
-            id = Integer.parseInt(idStr);
         } catch (NumberFormatException numex) {
-            response.sendError(500, "Unable to parse Id as integer");
-            return;
+            response.sendError(400, "Unable to parse Id as integer");
         }
+    }
 
-        if (id == -1) {
-            response.sendError(500, "Either title or content should be not null");
-            return;
-        }
-
-        int executeQue = this.postObjectMgmt.UnhidePost(id);
-        if (executeQue != 0) {
-            response.sendError(500, "The category could not be hiden");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/admin/posts?action=list");
-        }
-    }    
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
 
         if (session == null || !IsAuthenticated(session)) {
-            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp")
-                    .forward(request, response);
+            response.setStatus(401);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/NoPermission.jsp").forward(request, response);
             return;
         }
 
@@ -267,7 +208,7 @@ public class PostList extends HttpServlet {
                     request.setAttribute("post", post);
                     request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Edit.jsp").forward(request, response);
                 } catch (NumberFormatException numEx) {
-                    response.sendError(500, numEx.getLocalizedMessage());
+                    response.sendError(400);
                 }
             }
             case "hide" -> {
@@ -281,7 +222,7 @@ public class PostList extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Hide.jsp").forward(request, response);
 
                 } catch (NumberFormatException numEx) {
-                    response.sendError(500, numEx.getLocalizedMessage());
+                    response.sendError(400);
                 }
             }
             case "unhide" -> {
@@ -295,7 +236,7 @@ public class PostList extends HttpServlet {
                     request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/UnHide.jsp").forward(request, response);
 
                 } catch (NumberFormatException numEx) {
-                    response.sendError(500, numEx.getLocalizedMessage());
+                    response.sendError(400);
                 }
             }
             default -> {
@@ -320,7 +261,7 @@ public class PostList extends HttpServlet {
             case "edit" -> {
                 String idStr = request.getParameter("id");
                 if (idStr == null || !idStr.matches(numberRegex)) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                     return;
                 }
 
@@ -332,13 +273,13 @@ public class PostList extends HttpServlet {
                     }
                     this.EditPost(request, response);
                 } catch (NumberFormatException e) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                 }
             }
             case "hide" -> {
                 String idStr = request.getParameter("id");
                 if (idStr == null || !idStr.matches(numberRegex)) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                     return;
                 }
 
@@ -350,13 +291,13 @@ public class PostList extends HttpServlet {
                     }
                     this.HidePost(request, response);
                 } catch (NumberFormatException e) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                 }
             }
             case "unhide" -> {
                 String idStr = request.getParameter("id");
                 if (idStr == null || !idStr.matches(numberRegex)) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                     return;
                 }
 
@@ -368,7 +309,7 @@ public class PostList extends HttpServlet {
                     }
                     this.UnHidePost(request, response);
                 } catch (NumberFormatException e) {
-                    response.sendError(400, "Invalid ID");
+                    response.sendError(400);
                 }
             }
             default -> {

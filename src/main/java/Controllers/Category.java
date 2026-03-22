@@ -29,18 +29,18 @@ public class Category extends HttpServlet {
         String description = request.getParameter("description");
 
         if (name == null || description == null) {
-            response.sendError(500, "Required parameter is null, please check the input");
+            response.sendError(400);
             return;
         }
 
         if (!name.matches(nameRegex) || !description.matches(descriptionRegex)) {
-            response.sendError(500, "Required parameter is not in the compliance format. Please check the input");
+            response.sendError(400);
             return;
         }
 
         int sqlExec = this.categoryObjectMgmt.NewCategory(name, description);
         if (sqlExec != 0) {
-            response.sendError(500, "The category could not be created");
+            response.sendError(500);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/category?action=list");
         }
@@ -52,18 +52,18 @@ public class Category extends HttpServlet {
         String description = request.getParameter("description");
 
         if (oldName == null || newName == null || description == null) {
-            response.sendError(500, "Required parameter is null. Please check the input.");
+            response.sendError(400);
             return;
         }
 
         if (!oldName.matches(nameRegex) || !newName.matches(nameRegex) || !description.matches(descriptionRegex)) {
-            response.sendError(500, "Required parameter is not in the compliance format. Please check the input");
+            response.sendError(400);
             return;
         }
 
         int sqlExec = this.categoryObjectMgmt.EditCategory(oldName, newName, description);
         if (sqlExec != 0) {
-            response.sendError(500, "The category could not be editied");
+            response.sendError(500);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/category?action=list");
         }
@@ -128,10 +128,5 @@ public class Category extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/CategoryView/NoPermission.jsp").forward(request, response);
             }
         }
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
     }
 }

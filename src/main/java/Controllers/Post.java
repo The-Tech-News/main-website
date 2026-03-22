@@ -1,29 +1,28 @@
 package Controllers;
 
+import java.io.IOException;
+
 import Models.DAO.CategoryDAO;
-import Models.DAO.PostDAO;
 import Models.DAO.CommentDAO;
+import Models.DAO.PostDAO;
 import Models.DAO.StatisticDAO;
 import Models.DAO.UserDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
 @WebServlet(name = "Post", urlPatterns = {"/post"})
 public class Post extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final PostDAO postDAO;
-    private final CommentDAO commentDAO;
-    private final CategoryDAO categoryDao;
-    private final StatisticDAO statDAO;
-    private final UserDAO userDAO;
+    private transient final PostDAO postDAO;
+    private transient final CommentDAO commentDAO;
+    private transient final CategoryDAO categoryDao;
+    private transient final StatisticDAO statDAO;
+    private transient final UserDAO userDAO;
 
     private final String numberRegex = "^[0-9]+$";
 
@@ -47,6 +46,7 @@ public class Post extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
 
             Models.Objects.Post p = this.postDAO.GetPostId(id);
+            
             if (p == null) {
                 response.sendError(404, "Post not found");
                 return;
@@ -61,7 +61,7 @@ public class Post extends HttpServlet {
 
             request.getRequestDispatcher("/WEB-INF/JSPViews/PostView/Detail.jsp").forward(request, response);
         } catch (NumberFormatException ex) {
-            response.sendError(400, "Invalid ID");
+            response.sendError(400);
         }
     }
 

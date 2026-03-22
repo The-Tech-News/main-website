@@ -66,9 +66,13 @@
                         <li>
                             <a class="icon-link mb-1" href="<%= request.getContextPath()%>/admin/post" rel="noopener" target="_blank">Post Editor</a>
                         </li>
+                        <% String realmHome = System.getenv("WEB_REALM_OIDC_HOME"); %>
+
+                        <% if (realmHome != null) {%>
                         <li>
-                            <a class="icon-link mb-1" href="https://keycloak.anhvlt.io.vn/realms/master/account" rel="noopener" target="_blank">Manage your account (OIDC)</a>
+                            <a class="icon-link mb-1" href="<%= realmHome%>" rel="noopener" target="_blank">Manage your account (OIDC)</a>
                         </li>
+                        <% }%>
                     </ul>
                 </div>
             </div>

@@ -38,6 +38,7 @@ public class Statistic extends HttpServlet {
 
             // Admin only
             if (!IsAdmin(loggedUser)) {
+                response.setStatus(401);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
@@ -48,22 +49,23 @@ public class Statistic extends HttpServlet {
             }
 
             if (!action.equals("list")) {
+                response.setStatus(401);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
 
             String topStr = request.getParameter("top");
-            ArrayList<int[]> stats;
+            ArrayList<int[]> stats = new ArrayList<>();
 
             if (topStr != null && !topStr.isBlank()) {
                 if (!topStr.matches(numberRegex)) {
-                    response.sendError(500);
+                    response.sendError(400);
                     return;
                 }
 
                 int top = Integer.parseInt(topStr);
                 if (top <= 0) {
-                    response.sendError(500);
+                    response.sendError(400);
                     return;
                 }
 
@@ -76,7 +78,7 @@ public class Statistic extends HttpServlet {
             request.setAttribute("stats", stats);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
         } catch (ServletException | IOException | NumberFormatException e) {
-            response.sendError(500);
+            response.sendError(400);
         }
     }
 }

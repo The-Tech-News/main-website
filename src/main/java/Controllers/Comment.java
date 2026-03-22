@@ -44,8 +44,8 @@ public class Comment extends HttpServlet {
 
     private void CreateComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        User user = session == null ? null : (User) session.getAttribute("loggedUser");
-
+        User user = (session == null) ? null : (User) session.getAttribute("loggedUser");
+        
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
             return;
@@ -56,7 +56,7 @@ public class Comment extends HttpServlet {
             String content = request.getParameter("content");
 
             if (content == null || content.trim().isEmpty()) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                response.sendError(400);
                 return;
             }
 
@@ -64,19 +64,20 @@ public class Comment extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
         } catch (NumberFormatException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(500);
         }
     }
 
-    private void DeleteComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void DeleteComment(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession(false);
         User user = (session == null) ? null : (User) session.getAttribute("loggedUser");
 
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/auth?action=signin");
+            response.setStatus(401);
+            request.getRequestDispatcher("/WEB-INF/AuthView/Denied.jsp").forward(request, response);
             return;
         }
-
+        
         try {
             int id = Integer.parseInt(request.getParameter("id"));
             int postId = Integer.parseInt(request.getParameter("postid"));

@@ -26,7 +26,7 @@
             }
         </script>
 
-        <% String customTags = System.getenv("WEB_TAGS"); %>
+        <% String customTags = System.getenv("WEB_HEAD_TAGS"); %>
         <% if (customTags != null) {%>
         <%= customTags%>
         <% }%>

@@ -110,12 +110,12 @@ public class Auth extends HttpServlet {
         String pwdHash = request.getParameter("pwdHash");
 
         if (email == null || pwdHash == null) {
-            response.sendError(500, "Required parameter is null. Please check the input.");
+            response.sendError(400);
             return;
         }
 
         if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex)) {
-            response.sendError(500, "email or pwdHash did not in valid format.");
+            response.sendError(400);
             return;
         }
 
@@ -141,18 +141,18 @@ public class Auth extends HttpServlet {
         String name = request.getParameter("name");
 
         if (email == null || pwdHash == null || name == null) {
-            response.sendError(500, "Required parameter is null. Please check the input.");
+            response.sendError(400);
             return;
         }
 
         if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex) || !name.matches(nameRegex)) {
-            response.sendError(500, "Either email, pwdHash, or name is not in correct format. Please check the input.");
+            response.sendError(400);
             return;
         }
 
         int sqlExec = this.userObjectMgmt.CreateNewUser(email, pwdHash, name);
         if (sqlExec != 0) {
-            response.sendError(500, "The user could not be created.");
+            response.sendError(400);
         } else {
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
         }
@@ -190,12 +190,12 @@ public class Auth extends HttpServlet {
         HttpSession session = request.getSession();
 
         if (session == null || state == null || !state.equals(session.getAttribute("oidc_state"))) {
-            response.sendError(400, "Invalid OIDC state.");
+            response.sendError(500, "Invalid OIDC state.");
             return;
         }
 
         if (code == null) {
-            response.sendError(400, "Authorization code is missing.");
+            response.sendError(500, "Authorization code is missing.");
             return;
         }
 
@@ -395,10 +395,5 @@ public class Auth extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/Denied.jsp").forward(request, response);
             }
         }
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
     }
 }
