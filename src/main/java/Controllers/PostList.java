@@ -145,7 +145,6 @@ public class PostList extends HttpServlet {
             }
         } catch (NumberFormatException numex) {
             response.sendError(400, "Unable to parse Id as integer");
-            return;
         }
 
     }

@@ -31,41 +31,36 @@ public class Statistic extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
 
         try {
-            HttpSession session = request.getSession(false);
-            User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
-
             // Admin only
             if (!IsAdmin(loggedUser)) {
-                response.setStatus(401);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
 
             String action = request.getParameter("action");
-            if (action == null) {
-                action = "list";
-            }
-
-            if (!action.equals("list")) {
-                response.setStatus(401);
+            if (action == null || !action.equals("list")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
                 return;
             }
 
             String topStr = request.getParameter("top");
-            ArrayList<int[]> stats = new ArrayList<>();
+            ArrayList<int[]> stats;
 
             if (topStr != null && !topStr.isBlank()) {
                 if (!topStr.matches(numberRegex)) {
-                    response.sendError(400);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid 'top' parameter");
                     return;
                 }
 
                 int top = Integer.parseInt(topStr);
                 if (top <= 0) {
-                    response.sendError(400);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "'top' parameter must be greater than 0");
                     return;
                 }
 
@@ -78,7 +73,7 @@ public class Statistic extends HttpServlet {
             request.setAttribute("stats", stats);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
         } catch (ServletException | IOException | NumberFormatException e) {
-            response.sendError(400);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "An error occurred while processing the request");
         }
     }
 }
