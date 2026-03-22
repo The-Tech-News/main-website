@@ -10,16 +10,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserDAO extends DBContext {
+
     // User Sign-in (SELECT)
     public User GetUserSignIn(String email, String pwdHash) {
         User user = null;
-        
+
         String sqlCommand = """
                             SELECT TOP (1) [id], [email], [pwdHash], [name], [isEnabled], [groupId]
                                 FROM [technewsdb].[dbo].[User]
                                 WHERE [email] = ? AND [pwdHash] = ? AND isEnabled = 1;
                             """;
-        
+
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setString(1, email);
             ps.setString(2, pwdHash);
@@ -40,7 +41,7 @@ public class UserDAO extends DBContext {
 
         return user;
     }
-    
+
     // Get user by email (no password check)
     public User GetUserSignIn(String email) {
         User user = null;
@@ -70,11 +71,11 @@ public class UserDAO extends DBContext {
 
         return user;
     }
-    
+
     // User Sign up (Proc)
     public int CreateNewUser(String email, String pwdHash, String name) {
         int returnValue = -1;
-        
+
         String sqlCommand = """
                             DECLARE	@return_value int;
                             EXEC	@return_value = [technewsdb].[dbo].[NewUser]
@@ -84,7 +85,7 @@ public class UserDAO extends DBContext {
                             		@groupId = 2;
                             SELECT	'retval' = @return_value;
                             """;
-        
+
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setString(1, email);
             ps.setString(2, pwdHash);
@@ -97,7 +98,7 @@ public class UserDAO extends DBContext {
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return returnValue;
     }
 
@@ -111,17 +112,14 @@ public class UserDAO extends DBContext {
                             """;
 
         try (
-                PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand);
-                ResultSet rs = ps.executeQuery()
-            ) 
-        {
+                PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.put(rs.getInt("id"), rs.getString("name"));
             }
         } catch (SQLException sqlEx) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, sqlEx);
         }
-        
+
         return list;
     }
 }

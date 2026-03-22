@@ -1,0 +1,7 @@
+CREATE TABLE Ads (
+    id INT IDENTITY(1, 1) PRIMARY KEY,
+    postId INT NOT NULL,
+    title NVARCHAR(255) NOT NULL,
+    uriImage NVARCHAR(500) NOT NULL
+)
+GO
