@@ -1,8 +1,10 @@
 package Controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import Models.DAO.StatisticDAO;
 import Models.Objects.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,15 +12,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
 @WebServlet(name = "Statistic", urlPatterns = {"/admin/stat"})
 public class Statistic extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final StatisticDAO statDAO;
+    private transient final StatisticDAO statDAO;
 
     private final String numberRegex = "^[0-9]+$";
 

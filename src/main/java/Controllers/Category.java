@@ -1,9 +1,9 @@
 package Controllers;
 
+import java.io.IOException;
+
 import Models.DAO.CategoryDAO;
 import Models.Objects.User;
-
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,7 +18,7 @@ public class Category extends HttpServlet {
     private final String nameRegex = "^[A-Za-z0-9]+$";
     private final String descriptionRegex = "^[0-9\\p{L}\\. ]+$";
 
-    private final CategoryDAO categoryObjectMgmt;
+    private transient final CategoryDAO categoryObjectMgmt;
 
     public Category() {
         this.categoryObjectMgmt = new CategoryDAO();

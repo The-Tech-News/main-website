@@ -1,9 +1,10 @@
 package Controllers;
 
+import java.io.IOException;
+
 import Models.DAO.CategoryDAO;
 import Models.DAO.PostDAO;
 import Models.DAO.UserDAO;
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,9 +16,9 @@ public class Index extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
-    private final PostDAO postDao;
-    private final CategoryDAO categoryDao;
-    private final UserDAO userDAO;
+    private transient final PostDAO postDao;
+    private transient final CategoryDAO categoryDao;
+    private transient final UserDAO userDAO;
 
     public Index() {
         this.postDao = new PostDAO();
