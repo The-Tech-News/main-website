@@ -2,6 +2,7 @@ package Models.DAO;
 
 import Models.DBContext;
 import Models.Objects.User;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,7 +25,7 @@ public class UserDAO extends DBContext {
 
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setString(1, email);
-            ps.setString(2, this.hashPasswordPBKDF2(password));
+            ps.setString(2, this.HashingMD5(password));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     user = new User(
