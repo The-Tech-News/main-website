@@ -108,13 +108,13 @@ GO
 EXEC NewUser N'anhvlt.2006@outlook.com', 'ff028e1c6f8d43e18a6e0c5426d41683', 'Vo Luu Tuong Anh', 1;
 GO
 
-EXEC NewUser N'vuongkienhao2006@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Vuong Kien Hao', 1;
+EXEC NewUser N'vuongkienhao2006@gmail.com', '7b8b8a24e8594958bc89054224529d1e', 'Vuong Kien Hao', 1;
 GO
 
-EXEC NewUser N'longvcl173@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Le Tuan Kiet', 1;
+EXEC NewUser N'longvcl173@gmail.com', '38b9bbe09e1f4884a9d81193e97b417b', 'Le Tuan Kiet', 1;
 GO
 
-EXEC NewUser N'thienku74@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Vu Duy', 1;
+EXEC NewUser N'duynvce191176@gmail.com', 'a5047408405f4ac593b3d2c61a7c71c4', 'Vu Duy', 1;
 GO
 
 /** TABLE: Category **/

@@ -4,24 +4,22 @@ public class User {
 
     private final int id;
     private final String email;
-    private final String pwdHash;
     private final String name;
     private final int groupId;
 
-    public User(int id, String email, String pwdHash, String name, int groupId) {
+    public User(int id, String email, String name, int groupId) {
         this.id = id;
         this.email = email;
-        this.pwdHash = pwdHash;
         this.name = name;
         this.groupId = groupId;
     }
 
-    public String getEmail() {
-        return email;
+    public int getId() {
+        return id;
     }
 
-    public String getPwdHash() {
-        return pwdHash;
+    public String getEmail() {
+        return email;
     }
 
     public String getName() {
@@ -30,9 +28,5 @@ public class User {
 
     public int getGroupId() {
         return groupId;
-    }
-
-    public int getId() {
-        return id;
     }
 }

@@ -44,7 +44,6 @@ public class Auth extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private final String[] cookieHeadName = {"email", "name"};
     private final String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
 
     private final String OidcIssuer;
@@ -96,19 +95,19 @@ public class Auth extends HttpServlet {
 
     private void HandleSignIn(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String pwdHash = request.getParameter("pwdHash");
+        String password = request.getParameter("password");
 
-        if (email == null || pwdHash == null) {
+        if (email == null || password == null) {
             response.sendError(400);
             return;
         }
 
-        if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex)) {
+        if (!email.matches(emailRegex)) {
             response.sendError(400);
             return;
         }
 
-        User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
+        User user = userObjectMgmt.GetUserSignIn(email, password);
         if (user != null) {
             String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
 
@@ -126,20 +125,20 @@ public class Auth extends HttpServlet {
 
     private void HandleSignUp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String pwdHash = request.getParameter("pwdHash");
+        String password = request.getParameter("password");
         String name = request.getParameter("name");
 
-        if (email == null || pwdHash == null || name == null) {
+        if (email == null || password == null || name == null) {
             response.sendError(400);
             return;
         }
 
-        if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex) || !name.matches(nameRegex)) {
+        if (!email.matches(emailRegex) || !name.matches(nameRegex)) {
             response.sendError(400);
             return;
         }
 
-        int sqlExec = this.userObjectMgmt.CreateNewUser(email, pwdHash, name);
+        int sqlExec = this.userObjectMgmt.CreateNewUser(email, password, name);
         if (sqlExec != 0) {
             response.sendError(400);
         } else {
