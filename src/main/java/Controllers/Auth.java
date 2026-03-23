@@ -67,17 +67,6 @@ public class Auth extends HttpServlet {
         }
     }
 
-    /*
-    API Mapping for Auth
-    - POST
-        + action=signin - Dang Nhap
-        + action=signup - Dang Ky
-        + action=logout - Dang xuat
-    - GET
-        + action=signin - Dang Nhap
-        + action=signup - Dang Ky
-        + action=logout - Dang xuat
-     */
     private boolean IsSignedIn(HttpServletRequest request) {
         User u = (User) request.getSession().getAttribute("loggedUser");
         return u != null;
