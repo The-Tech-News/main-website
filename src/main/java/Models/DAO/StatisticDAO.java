@@ -1,89 +1,78 @@
 package Models.DAO;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashMap;
 
 import Models.DBContext;
 
-public class StatisticDAO {
+public class StatisticDAO extends DBContext {
 
-    private static final Logger LOGGER = Logger.getLogger(StatisticDAO.class.getName());
+    public HashMap<Integer, Integer> GetViews() {
+        HashMap<Integer, Integer> list = new HashMap<>();
 
-    public ArrayList<int[]> GetAll() {
-        ArrayList<int[]> list = new ArrayList<>();
+        String sqlComm = """
+                            SELECT [postId], [count]
+                                FROM [dbo].[PostStat]
+                                ORDER BY [count] DESC, [postId] ASC;
+                        """;
 
-        String sql = """
-            SELECT postId, [count]
-            FROM dbo.PostStat
-            ORDER BY [count] DESC, postId ASC;
-        """;
-
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                list.add(new int[]{rs.getInt("postId"), rs.getInt("count")});
-            }
-
+        try (
+                PreparedStatement ps = super.getConnection().prepareStatement(sqlComm);
+                ResultSet rs = ps.executeQuery()
+            ) {
+                while (rs.next()) {
+                    list.put(rs.getInt("postId"), rs.getInt("count"));
+                }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "GetAll failed", ex);
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return list;
     }
 
-    public ArrayList<int[]> GetTop(int top) {
-        ArrayList<int[]> list = new ArrayList<>();
+    public HashMap<Integer, Integer> GetViews(int top) {
+        HashMap<Integer, Integer> list = new HashMap<>();
 
-        String sql = """
-            SELECT TOP (?) postId, [count]
-            FROM dbo.PostStat
-            ORDER BY [count] DESC, postId ASC;
-        """;
+        String sqlComm = """
+                            SELECT TOP (?) [postId], [count]
+                                FROM [dbo].[PostStat]
+                                ORDER BY [count] DESC, [postId] ASC;
+                        """;
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlComm)) {
             ps.setInt(1, top);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(new int[]{rs.getInt("postId"), rs.getInt("count")});
+                    list.put(rs.getInt("postId"), rs.getInt("count"));
                 }
             }
-
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "GetTop failed", ex);
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return list;
     }
 
     public void IncreaseViewCount(int postId) {
-        String sql = """
-            MERGE dbo.PostStat AS target
-            USING (SELECT ? AS postId) AS source
-            ON target.postId = source.postId
-            WHEN MATCHED THEN
-                UPDATE SET [count] = target.[count] + 1
-            WHEN NOT MATCHED THEN
-                INSERT (postId, [count]) VALUES (source.postId, 1);
-        """;
+        String sqlComm = """
+                            MERGE dbo.PostStat AS target
+                            USING (SELECT ? AS postId) AS source
+                            ON target.postId = source.postId
+                            WHEN MATCHED THEN
+                                UPDATE SET [count] = target.[count] + 1
+                            WHEN NOT MATCHED THEN
+                                INSERT (postId, [count]) VALUES (source.postId, 1);
+                        """;
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = super.getConnection().prepareStatement(sqlComm)) {
             ps.setInt(1, postId);
             ps.executeUpdate();
-
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "IncreaseViewCount failed", ex);
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

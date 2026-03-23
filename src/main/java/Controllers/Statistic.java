@@ -1,7 +1,6 @@
 package Controllers;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import Models.DAO.StatisticDAO;
 import Models.Objects.User;
@@ -11,6 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
 
 @WebServlet(name = "Statistic", urlPatterns = {"/admin/stat"})
 public class Statistic extends HttpServlet {
@@ -30,11 +30,11 @@ public class Statistic extends HttpServlet {
     private void GetTop(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             String topStr = request.getParameter("top");
-            ArrayList<int[]> stats
+            HashMap<Integer, Integer> list
                     = (topStr != null && !topStr.isBlank() && topStr.matches("^[0-9]+$"))
-                    ? statDAO.GetTop(Integer.parseInt(topStr))
-                    : statDAO.GetAll();
-            request.setAttribute("stats", stats);
+                    ? statDAO.GetViews(Integer.parseInt(topStr))
+                    : statDAO.GetViews();
+            request.setAttribute("stats", list);
             request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendError(400);
