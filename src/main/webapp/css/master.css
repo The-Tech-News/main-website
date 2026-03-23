@@ -65,6 +65,40 @@
     color: #c00
 }
 
+.comments-section {
+    width: 100%;
+}
+
+.comment-item {
+    border-radius: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.comment-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.comment-body {
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+#comment-content {
+    resize: none;
+}
+.markdown-content p {
+    margin-bottom: 0.5rem;
+}
+
+.markdown-content strong {
+    font-weight: 600;
+}
+
+.markdown-content em {
+    font-style: italic;
+}
+
 @media (max-width:600px) {
     .comments-section {
         padding: 8px
