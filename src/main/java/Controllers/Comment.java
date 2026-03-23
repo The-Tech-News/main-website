@@ -45,7 +45,7 @@ public class Comment extends HttpServlet {
     private void CreateComment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         User user = (session == null) ? null : (User) session.getAttribute("loggedUser");
-        
+
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
             return;
@@ -77,7 +77,7 @@ public class Comment extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/AuthView/Denied.jsp").forward(request, response);
             return;
         }
-        
+
         try {
             int id = Integer.parseInt(request.getParameter("id"));
             int postId = Integer.parseInt(request.getParameter("postid"));
