@@ -81,14 +81,22 @@ public class PostList extends HttpServlet {
         String categoryIdStr = request.getParameter("categoryId");
 
         if (title == null || content == null || title.trim().isEmpty() || content.trim().isEmpty()) {
-            response.sendError(400, "Title and content must not be empty");
-            return;
-        }
+    ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
+    request.setAttribute("categories", categories);
+    request.setAttribute("error", "Title and content must not be empty");
+    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp")
+           .forward(request, response);
+    return;
+}
 
-        if (categoryIdStr == null || !categoryIdStr.matches(numberRegex)) {
-            response.sendError(400, "Invalid Category ID");
-            return;
-        }
+       if (categoryIdStr == null || !categoryIdStr.matches(numberRegex)) {
+    ArrayList<Models.Objects.Category> categories = categoryObjectMgmt.GetListCategory();
+    request.setAttribute("categories", categories);
+    request.setAttribute("error", "Invalid Category ID");
+    request.getRequestDispatcher("/WEB-INF/JSPViews/PostListView/Create.jsp")
+           .forward(request, response);
+    return;
+}
 
         int userId = u.getId();
 
