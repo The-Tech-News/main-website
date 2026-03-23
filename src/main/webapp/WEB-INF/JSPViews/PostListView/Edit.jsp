@@ -17,25 +17,28 @@
                 Post post = (Post) request.getAttribute("post");
             %>
             <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=edit&id=<%= post.getId()%>">
+                    <% if (request.getAttribute("error") != null) { %>
+                    <div class="alert alert-danger"><%= request.getAttribute("error") %></div>
+                    <% } %>
                 <div class="mb-3">
                     <label for="title" class="form-label">Post title</label>
-                    <input type="text" id="title" name="title" class="form-control" value="<%= post.getTitle()%>">
+                    <input type="text" id="title" name="title" class="form-control" value="<%= post.getTitle()%>" required>
                 </div>
                 <div class="mb-3">
                     <label for="content" class="form-label">Content</label>
-                    <textarea class="form-control" id="content" name="content" rows="3"><%= post.getContent()%></textarea>
+                    <textarea class="form-control" id="content" name="content" rows="3" required ><%= post.getContent()%></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="categoryId" name="categoryId">
-                        <option selected>Choose...</option>
+                    <select class="form-select" id="categoryId" name="categoryId" required>
+                         <option value="" disabled>Choose...</option>
                         <%
                             for (Category c : categories) {
                         %>
-                        <option value="<%= c.getId()%>"><%= c.getName()%></option>
-                        <%
-                            }
-                        %>
+                        <option value="<%= c.getId()%>" 
+                            <%= c.getId() == post.getCategoryId() ? "selected" : "" %>>
+                            <%= c.getName()%>
+                        </option>
                     </select>
                 </div>
                 <div class="mb-3">
