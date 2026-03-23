@@ -105,7 +105,16 @@ GO
 EXEC NewUser N'administrator@anhvlt.io.vn', 'b094fb4206914fb38916192c3b752ed8', 'Administrator', 1;
 GO
 
-EXEC NewUser N'anhvlt.2006@outlook.com', 'ff028e1c6f8d43e1-8a6e0c5426d41683', 'Vo Luu Tuong Anh', 1;
+EXEC NewUser N'anhvlt.2006@outlook.com', 'ff028e1c6f8d43e18a6e0c5426d41683', 'Vo Luu Tuong Anh', 1;
+GO
+
+EXEC NewUser N'vuongkienhao2006@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Vuong Kien Hao', 1;
+GO
+
+EXEC NewUser N'longvcl173@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Le Tuan Kiet', 1;
+GO
+
+EXEC NewUser N'thienku74@gmail.com', 'b094fb4206914fb38916192c3b752ed8', 'Vu Duy', 1;
 GO
 
 /** TABLE: Category **/
@@ -202,9 +211,6 @@ EXEC NewCategory 'windows', 'A category about Windows';
 GO
 EXEC NewCategory 'linux', 'A category about Linux';
 GO
-
--- Code merge, by nguyenduyk19
--- Some encoding and coding style has been editied, due to limitation of sqlcmd
 
 /** TABLE: Post **/
 SET ANSI_NULLS ON
