@@ -9,6 +9,8 @@ Secondary site (for failover): [![GitLab CI/CD](https://img.shields.io/badge/git
 
 This repo contains the main web page of the project for PRJ301
 
+![Screenshot of main web page](./screenshot.png)
+
 ## Build
 
 ### Running in development
