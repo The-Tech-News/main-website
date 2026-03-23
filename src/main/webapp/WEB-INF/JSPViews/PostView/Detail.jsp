@@ -80,8 +80,7 @@
                                 <div class="comment-body"><%= escaped%></div>
                                 <div class="comment-actions">
                                     <% if (canDelete) {%>
-                                    <form class="comment-delete-form" action="${pageContext.request.contextPath}/comment?action=delete" method="post" onsubmit="return confirm('Delete this comment?');">
-                                        <input type="hidden" name="id" value="<%= c.getId()%>">
+                                    <form class="comment-delete-form" action="${pageContext.request.contextPath}/comment?action=delete&id=<%= c.getId()%>" method="post" onsubmit="return confirm('Delete this comment?');">
                                         <button type="submit" class="btn btn-link delete-btn">Delete</button>
                                     </form>
                                     <% } %>

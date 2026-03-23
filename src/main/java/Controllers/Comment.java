@@ -73,23 +73,28 @@ public class Comment extends HttpServlet {
         User user = (session == null) ? null : (User) session.getAttribute("loggedUser");
 
         if (user == null) {
-            response.setStatus(401);
-            request.getRequestDispatcher("/WEB-INF/AuthView/Denied.jsp").forward(request, response);
+            response.sendError(401);
             return;
         }
 
         try {
             int id = Integer.parseInt(request.getParameter("id"));
-            int postId = Integer.parseInt(request.getParameter("postid"));
+            
+            Models.Objects.Comment comment = commentDAO.GetComment(id);
+            
+            if (comment == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Comment not found.");
+                return;
+            }
 
-            if (user.getId() == this.commentDAO.GetComment(id).getUserId() || user.getGroupId() == 1) {
+            if (user.getId() == comment.getUserId() || user.getGroupId() == 1) {
                 commentDAO.hide(id, user.getId());
-                response.sendRedirect(request.getContextPath() + "/post?id=" + postId);
+                response.sendRedirect(request.getContextPath() + "/post?id=" + comment.getPostId());
             } else {
-                response.sendError(500);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to delete this comment.");
             }
         } catch (NumberFormatException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters.");
         }
     }
 }
