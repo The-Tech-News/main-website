@@ -3,16 +3,12 @@ package Models.DAO;
 import Models.DBContext;
 import Models.Objects.User;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 public class UserDAO extends DBContext {
 
@@ -91,7 +87,7 @@ public class UserDAO extends DBContext {
 
         try (PreparedStatement ps = super.getConnection().prepareStatement(sqlCommand)) {
             ps.setString(1, email);
-            ps.setString(2, this.hashPasswordPBKDF2(password));
+            ps.setString(2, this.HashingMD5(password));
             ps.setString(3, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -126,35 +122,18 @@ public class UserDAO extends DBContext {
         return list;
     }
 
-    private String hashPasswordPBKDF2(String raw) {
-        // PBKDF2 parameters
-        int iterations = 65536;
-        int keyLength = 256; // bits
-
+    private String HashingMD5(String raw) {
         try {
-            // Generate a random salt
-            byte[] salt = new byte[16];
-            SecureRandom secureRandom = new SecureRandom();
-            secureRandom.nextBytes(salt);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] mess = md.digest(raw.getBytes());
 
-            // Derive the key (hash)
-            PBEKeySpec spec = new PBEKeySpec(raw.toCharArray(), salt, iterations, keyLength);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            byte[] hash = skf.generateSecret(spec).getEncoded();
-
-            // Encode as iterations:saltHex:hashHex
             StringBuilder sb = new StringBuilder();
-            sb.append(iterations).append(":");
-            for (byte b : salt) {
-                sb.append(String.format("%02x", b));
-            }
-            sb.append(":");
-            for (byte b : hash) {
+            for (byte b : mess) {
                 sb.append(String.format("%02x", b));
             }
 
             return sb.toString();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+        } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE, null, ex);
             return "";
         }
