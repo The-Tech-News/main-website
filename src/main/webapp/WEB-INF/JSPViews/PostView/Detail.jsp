@@ -11,7 +11,6 @@
     <head>
         <title>The Tech News - Post</title>
         <%@include file="/WEB-INF/JSPViews/global/htmlHead.jsp" %>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/comment.css">
         <script async src="${pageContext.request.contextPath}/js/global/comment.js" defer></script>
     </head>
 
@@ -47,9 +46,7 @@
                         · <span class="badge text-bg-warning">Hidden</span>
                         <% }%>
                     </div>
-                    <div class="mt-3" style="white-space: pre-wrap;">
-                        <%= post.getContent()%>
-                    </div>
+                    <div class="mt-3" style="white-space: pre-wrap;" id="post-content"></div>
 
                     <!-- Comment section -->
                     <div class="comments-section mt-4" data-postid="<%= post.getId()%>">
@@ -94,5 +91,21 @@
         </main>
         <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
         <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
+        <!-- MarkDown -->
+        <script type="module">
+            import { marked } from '<%= request.getContextPath() %>/lib/marked/lib/marked.esm.js';
+
+            // Ensure the element exists before accessing it
+            const postContentElement = document.getElementById('post-content');
+            if (postContentElement) {
+                // Fetch and sanitize the markdown content
+                const markdownContent = `<%= post.getContent().replace("`", "\\`") %>`;
+
+                // Parse and render the markdown content
+                postContentElement.innerHTML = marked.parse(markdownContent);
+            } else {
+                console.error('Element with ID "post-content" not found.');
+            }
+        </script>
     </body>
 </html>
