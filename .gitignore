@@ -19,8 +19,4 @@ buildNumber.properties
 # Exclude Visual Studio personalized files
 .vscode
 .vs
-
-# Docker Volumes
-dockervols/weblogs
-
 .fake
