@@ -20,3 +20,6 @@ buildNumber.properties
 .vscode
 .vs
 .fake
+
+# Docker vols
+.docker/dockervols/weblogs
