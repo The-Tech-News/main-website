@@ -39,6 +39,7 @@
                             <%= c.getId() == post.getCategoryId() ? "selected" : "" %>>
                             <%= c.getName()%>
                         </option>
+                        <% } %>
                     </select>
                 </div>
                 <div class="mb-3">
