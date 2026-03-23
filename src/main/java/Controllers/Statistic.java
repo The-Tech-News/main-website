@@ -1,83 +1,67 @@
 package Controllers;
 
+import java.io.IOException;
+
 import Models.DAO.StatisticDAO;
 import Models.Objects.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 @WebServlet(name = "Statistic", urlPatterns = {"/admin/stat"})
 public class Statistic extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final StatisticDAO statDAO;
-
-    private final String numberRegex = "^[0-9]+$";
+    private transient final StatisticDAO statDAO;
 
     public Statistic() {
         this.statDAO = new StatisticDAO();
     }
 
     private boolean IsAdmin(User u) {
-        return u != null && u.getGroupId() == 1;
+        return (u != null && u.getGroupId() == 1);
+    }
+
+    private void GetTop(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String topStr = request.getParameter("top");
+            HashMap<Integer, Integer> list
+                    = (topStr != null && !topStr.isBlank() && topStr.matches("^[0-9]+$"))
+                    ? statDAO.GetViews(Integer.parseInt(topStr))
+                    : statDAO.GetViews();
+            request.setAttribute("stats", list);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendError(400);
+        }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
 
-        try {
-            HttpSession session = request.getSession(false);
-            User loggedUser = (session == null) ? null : (User) session.getAttribute("loggedUser");
+        if (!IsAdmin(loggedUser)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
+            return;
+        }
 
-            // Admin only
-            if (!IsAdmin(loggedUser)) {
-                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
-                return;
+        switch (request.getParameter("action")) {
+            case null -> {
+                response.sendRedirect(request.getContextPath() + "/admin/stat?action=list");
             }
-
-            String action = request.getParameter("action");
-            if (action == null) {
-                action = "list";
+            case "list" -> {
+                this.GetTop(request, response);
             }
-
-            if (!action.equals("list")) {
-                request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/NoPermission.jsp").forward(request, response);
-                return;
+            default -> {
+                response.sendRedirect(request.getContextPath() + "/admin/stat?action=list");
             }
-
-            String topStr = request.getParameter("top");
-            ArrayList<int[]> stats;
-
-            if (topStr != null && !topStr.isBlank()) {
-                if (!topStr.matches(numberRegex)) {
-                    response.sendError(500);
-                    return;
-                }
-
-                int top = Integer.parseInt(topStr);
-                if (top <= 0) {
-                    response.sendError(500);
-                    return;
-                }
-
-                stats = statDAO.GetTop(top);
-                request.setAttribute("top", top);
-            } else {
-                stats = statDAO.GetAll();
-            }
-
-            request.setAttribute("stats", stats);
-            request.getRequestDispatcher("/WEB-INF/JSPViews/StatisticView/List.jsp").forward(request, response);
-        } catch (ServletException | IOException | NumberFormatException e) {
-            response.sendError(500);
         }
     }
 }

@@ -23,7 +23,7 @@
                             <label for="floatingInput">Email</label> 
                         </div>
                         <div class="form-floating mb-3"> 
-                            <input name="pwdHash" type="password" class="form-control" id="password"> 
+                            <input name="password" type="password" class="form-control" id="password"> 
                             <label for="floatingPassword">Mật khẩu</label> 
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit">Đăng Ký</button>
@@ -35,7 +35,5 @@
         </div>
         <%@include file="/WEB-INF/JSPViews/global/footer.jsp" %>
         <%@include file="/WEB-INF/JSPViews/global/htmlScripts.jsp" %>
-        <script src="<% out.print(request.getContextPath());%>/lib/crypto-js/crypto-js.min.js"></script>
-        <script src="<% out.print(request.getContextPath());%>/js/auth/master.js"></script>
     </body>
 </html>

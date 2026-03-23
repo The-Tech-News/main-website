@@ -1,5 +1,5 @@
+<%@page import="java.util.HashMap"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.ArrayList"%>
 
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
@@ -25,7 +25,7 @@
             </div>
 
             <%
-                ArrayList<int[]> stats = (ArrayList<int[]>) request.getAttribute("stats");
+                HashMap<Integer, Integer> stats = (HashMap<Integer, Integer>) request.getAttribute("stats");
                 if (stats == null || stats.isEmpty()) {
             %>
             <div class="alert alert-info">No stats yet.</div>
@@ -35,24 +35,19 @@
                     <table class="table table-sm table-striped mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
                                 <th>Post ID</th>
                                 <th>Count</th>
                             </tr>
                         </thead>
                         <tbody>
                             <%
-                                int i = 1;
-                                for (int[] row : stats) {
-                                    int postId = row[0];
-                                    int count = row[1];
+                                for (int postId : stats.keySet()) {
                             %>
                             <tr>
-                                <td><%= i++%></td>
                                 <td>
                                     <a href="<%= request.getContextPath()%>/post?id=<%= postId%>"><%= postId%></a>
                                 </td>
-                                <td><%= count%></td>
+                                <td><%= stats.get(postId)%></td>
                             </tr>
                             <%
                                 }

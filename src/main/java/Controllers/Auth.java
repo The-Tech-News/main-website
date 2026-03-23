@@ -1,10 +1,35 @@
 package Controllers;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.proc.JWSVerificationKeySelector;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+
 import Models.DAO.UserDAO;
 import Models.Objects.User;
-
-import java.io.IOException;
-
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -13,41 +38,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.UUID;
-import java.util.Date;
-import java.time.Instant;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
-import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jose.proc.JWSVerificationKeySelector;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 @WebServlet(name = "Auth", urlPatterns = {"/auth"})
 public class Auth extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final String[] cookieHeadName = {"email", "name"};
     private final String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    private final String pwdhashRegex = "^[A-Za-z0-9]+$";
     private final String nameRegex = "^[\\p{L}\\. ]+$";
 
     private final String OidcIssuer;
@@ -56,7 +52,7 @@ public class Auth extends HttpServlet {
 
     private boolean isOidcEnabled = false;
 
-    private final UserDAO userObjectMgmt;
+    private transient final UserDAO userObjectMgmt;
 
     public Auth() {
         this.userObjectMgmt = new UserDAO();
@@ -70,17 +66,6 @@ public class Auth extends HttpServlet {
         }
     }
 
-    /*
-    API Mapping for Auth
-    - POST
-        + action=signin - Dang Nhap
-        + action=signup - Dang Ky
-        + action=logout - Dang xuat
-    - GET
-        + action=signin - Dang Nhap
-        + action=signup - Dang Ky
-        + action=logout - Dang xuat
-     */
     private boolean IsSignedIn(HttpServletRequest request) {
         User u = (User) request.getSession().getAttribute("loggedUser");
         return u != null;
@@ -110,19 +95,19 @@ public class Auth extends HttpServlet {
 
     private void HandleSignIn(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String pwdHash = request.getParameter("pwdHash");
+        String password = request.getParameter("password");
 
-        if (email == null || pwdHash == null) {
-            response.sendError(500, "Required parameter is null. Please check the input.");
+        if (email == null || password == null) {
+            response.sendError(400);
             return;
         }
 
-        if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex)) {
-            response.sendError(500, "email or pwdHash did not in valid format.");
+        if (!email.matches(emailRegex)) {
+            response.sendError(400);
             return;
         }
 
-        User user = userObjectMgmt.GetUserSignIn(email, pwdHash);
+        User user = userObjectMgmt.GetUserSignIn(email, password);
         if (user != null) {
             String encodedName = URLEncoder.encode(user.getName(), StandardCharsets.UTF_8.toString());
 
@@ -140,22 +125,22 @@ public class Auth extends HttpServlet {
 
     private void HandleSignUp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String pwdHash = request.getParameter("pwdHash");
+        String password = request.getParameter("password");
         String name = request.getParameter("name");
 
-        if (email == null || pwdHash == null || name == null) {
-            response.sendError(500, "Required parameter is null. Please check the input.");
+        if (email == null || password == null || name == null) {
+            response.sendError(400);
             return;
         }
 
-        if (!email.matches(emailRegex) || !pwdHash.matches(pwdhashRegex) || !name.matches(nameRegex)) {
-            response.sendError(500, "Either email, pwdHash, or name is not in correct format. Please check the input.");
+        if (!email.matches(emailRegex) || !name.matches(nameRegex)) {
+            response.sendError(400);
             return;
         }
 
-        int sqlExec = this.userObjectMgmt.CreateNewUser(email, pwdHash, name);
+        int sqlExec = this.userObjectMgmt.CreateNewUser(email, password, name);
         if (sqlExec != 0) {
-            response.sendError(500, "The user could not be created.");
+            response.sendError(400);
         } else {
             response.sendRedirect(request.getContextPath() + "/auth?action=signin");
         }
@@ -193,12 +178,12 @@ public class Auth extends HttpServlet {
         HttpSession session = request.getSession();
 
         if (session == null || state == null || !state.equals(session.getAttribute("oidc_state"))) {
-            response.sendError(400, "Invalid OIDC state.");
+            response.sendError(500, "Invalid OIDC state.");
             return;
         }
 
         if (code == null) {
-            response.sendError(400, "Authorization code is missing.");
+            response.sendError(500, "Authorization code is missing.");
             return;
         }
 
@@ -398,10 +383,5 @@ public class Auth extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/JSPViews/AuthView/Denied.jsp").forward(request, response);
             }
         }
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
     }
 }
