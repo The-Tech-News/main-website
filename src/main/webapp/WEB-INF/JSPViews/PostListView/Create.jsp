@@ -14,18 +14,21 @@
             <div class="row mb-2">
                 <h2>Create new post</h2>
                 <form method="POST" action="<%= request.getContextPath()%>/admin/posts?action=create">
+                 <% if (request.getAttribute("error") != null) { %>
+                        <div class="alert alert-danger"><%= request.getAttribute("error") %></div>
+                  <% } %>
                     <div>
                         <label for="title" class="form-label">Post title</label>
-                        <input type="text" id="title" name="title" class="form-control">
+                        <input type="text" id="title" name="title" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label for="content" class="form-label">Content</label>
-                        <textarea class="form-control" id="content" name="content" rows="3"></textarea>
+                        <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="categoryId" name="categoryId">
-                            <option selected>Choose...</option>
+                        <select class="form-select" id="categoryId" name="categoryId" required>
+                            <option value="" selected disabled>Choose...</option>
                             <%
                                 ArrayList<Category> categories = (ArrayList<Category>) request.getAttribute("categories");
                                 for (Category c : categories) {
